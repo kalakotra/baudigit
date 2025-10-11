@@ -224,4 +224,40 @@ $(function () {
     }
     return true;
   });
+
+  if ($('#calendarMembers').length) {
+    setTimeout(function() {
+      var calendarEl = document.getElementById('calendarMembers');
+      var visibleRange = {};
+      if (calendarEl.dataset.start !== undefined && calendarEl.dataset.end !== undefined) {
+        visibleRange = {
+          start: calendarEl.dataset.start,
+          end: calendarEl.dataset.end
+        };
+      }
+      var events = [];
+      $('#calendarMembers marker').each(function() {
+        events.push({
+          title: $(this).data('name'),
+          start: $(this).data('start'),
+          end: $(this).data('end'),
+          color: $(this).data('color')
+        });
+      });
+      
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'de',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: false
+        },
+        visibleRange: visibleRange,
+        events: events
+      });
+      calendar.render();
+    }, 250);
+  } 
+  // end calendar
 });

@@ -51,7 +51,7 @@ class ProjectAdmin extends ModelAdmin
     {
         $list = parent::getList();
         // Only show Projects specific to the planned status
-        if ($this->modelTab === 'planned') {
+        /*if ($this->modelTab === 'planned') {
             $list = $list->filter('Status', 0);
         } elseif ($this->modelTab === 'inprogress') {
             $list = $list->filter('Status', 1);
@@ -61,7 +61,7 @@ class ProjectAdmin extends ModelAdmin
             $list = $list->filter('Status', 3);
         } elseif ($this->modelTab === 'canceled') {
             $list = $list->filter('Status', 4);
-        }
+        }*/
         return $list;
     }
 

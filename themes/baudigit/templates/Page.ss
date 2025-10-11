@@ -19,6 +19,7 @@
 	<link rel="stylesheet" type="text/css" href="/_resources/themes/baudigit/javascript/plugins/metismenu/metisMenu.min.css">
 	<link rel="stylesheet" type="text/css" href="/_resources/themes/baudigit/javascript/plugins/metismenu/mm-vertical.css">
 	<link rel="stylesheet" type="text/css" href="/_resources/themes/baudigit/javascript/plugins/simplebar/css/simplebar.css">
+	<link href="/_resources/themes/baudigit/javascript/plugins/fullcalendar/css/main.min.css" rel="stylesheet">
 	<!--bootstrap css-->
 	<link href="/_resources/themes/baudigit/css/bootstrap.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="/_resources/themes/baudigit/css/extra-icons.css">
@@ -55,13 +56,15 @@
   <!--plugins-->
   <script src="/_resources/themes/baudigit/javascript/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
   <script src="/_resources/themes/baudigit/javascript/plugins/metismenu/metisMenu.min.js"></script>
-  <script src="/_resources/themes/baudigit/javascript/plugins/apexchart/apexcharts.min.js"></script>
+  <script src="/_resources/themes/baudigit/javascript/plugins/apexchart/apexcharts.min.js" type="dont/load"></script>
   <script src="/_resources/themes/baudigit/javascript/plugins/simplebar/js/simplebar.min.js"></script>
   <script src="/_resources/themes/baudigit/javascript/plugins/peity/jquery.peity.min.js"></script>
   <script>
     $(".data-attributes span").peity("donut")
   </script>
-  <script src="/_resources/themes/baudigit/javascript/dashboard2.js"></script>
+  <script src="/_resources/themes/baudigit/javascript/plugins/fullcalendar/js/main.min.js"></script>
+  <script src="/_resources/themes/baudigit/javascript/plugins/fullcalendar/js/de.global.js"></script>
+  <script src="/_resources/themes/baudigit/javascript/dashboard2.js" type="dont/load"></script>
   <script src="/_resources/themes/baudigit/javascript/main.js"></script>
 </body>
 </html>

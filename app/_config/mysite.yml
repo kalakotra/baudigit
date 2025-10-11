@@ -11,6 +11,10 @@ Silverstripe\SiteConfig\SiteConfig:
 SilverStripe\View\SSViewer:
   rewrite_hash_links: false
 
+SilverStripe\Security\Member:
+  extensions:
+    - App\Extensions\MemberExtension
+
 # UTF8MB4 has limited support in older MySQL versions.
 # Remove this configuration if you experience issues.
 ---

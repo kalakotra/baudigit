@@ -2,12 +2,15 @@
 
 namespace app\Models;
 
+use app\Models\Offer;
 use app\Models\Client;
-use SilverStripe\Forms\DropdownField;
+use app\Models\ProjectMember;
+use app\Models\ProjectDocument;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Member;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\i18n\i18nEntityProvider;
 use Kalakotra\Utils\DataObjectPermissions;
-use SilverStripe\Security\Member;
 use SilverStripe\Security\PermissionProvider;
 
 
@@ -39,24 +42,22 @@ class Project extends DataObject implements PermissionProvider, i18nEntityProvid
         'Status' => 'Int', // 0=Planned/New, 1=InProgress, 2=Completed, 3=Billed, 4=Canceled
         'Title' => 'Varchar(255)',
         'Description' => 'Text',
-        //'Date' => 'Datetime',
+        'StartDate' => 'Date',
+        'EndDate' => 'Date',
     ];
 
     private static $has_one = [
         'ClientObject' => ClientObject::class,
+        'Offer' => Offer::class,
     ];
 
     private static $has_many = [
-        'Documents' => File::class
-    ];
-
-    private static $many_many = [
-        'Members' => Member::class,
+        'ProjectDocuments' => ProjectDocument::class,
+        'ProjectMembers' => ProjectMember::class,
     ];
 
     private static $summary_fields = [
         'Title',
-        'Client.Company',
         'ClientObject.Name',
     ];
 
@@ -120,5 +121,40 @@ class Project extends DataObject implements PermissionProvider, i18nEntityProvid
 
         
         return $fields;
+    }
+
+    /**
+     * Get all members assigned to this project
+     */
+    public function getAssignedMembers()
+    {
+        return Member::get()->innerJoin('app_ProjectMember', 'app_ProjectMember.MemberID = Member.ID')
+            ->where(['app_ProjectMember.ProjectID' => $this->ID]);
+    }
+
+    /**
+     * Get members assigned to project within a specific date range
+     */
+    public function getMembersForDateRange($startDate, $endDate)
+    {
+        return $this->ProjectMembers()->filter([
+            'StartDate:LessThanOrEqual' => $endDate,
+            'EndDate:GreaterThanOrEqual' => $startDate
+        ]);
+    }
+
+    /**
+     * Check if a member is assigned to this project during a specific period
+     */
+    public function isMemberAssigned($memberID, $startDate = null, $endDate = null)
+    {
+        $filter = ['MemberID' => $memberID];
+        
+        if ($startDate && $endDate) {
+            $filter['StartDate:LessThanOrEqual'] = $endDate;
+            $filter['EndDate:GreaterThanOrEqual'] = $startDate;
+        }
+        
+        return $this->ProjectMembers()->filter($filter)->count() > 0;
     }
 }
