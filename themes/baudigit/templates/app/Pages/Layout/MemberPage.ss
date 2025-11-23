@@ -48,55 +48,12 @@
     <% else %>
         <div class="card">
             <div class="card-header text-end">
-                <a type="button" class="btn btn-primary px-4" href="{$Top.Link}/?a=1">Benutzer erstellen</a>
+                <a type="button" class="btn btn-success px-4" href="{$Top.Link}/?a=1">Benutzer erstellen</a>
             </div>
         </div>
         <div class="card">
             <div class="card-body">
-                <div class="table-responsive">
-                    <table id="example" class="table table-striped table-bordered" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>E-Mail</th>
-                                <th>Benutzergruppe</th>
-                                <th>Erstellt am</th>
-                                <th>Letzter Login</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% loop readAllInputs %>
-                                <tr>
-                                    <td>$FirstName $Surname</td>
-                                    <td>$Email</td>
-                                    <td>
-                                        <% if Groups.filter('ID', 2).count > 0 %>
-                                            <span class="badge bg-danger">Administrator</span>
-                                        <% else_if Groups.filter('ID', 3).count > 0 %>
-                                            <span class="badge bg-primary">Arbeiter</span>
-                                        <% else %>
-                                            <span class="badge bg-secondary">Keine Gruppe</span>
-                                        <% end_if %>
-                                    </td>
-                                    <td>$Created.Format('dd.MM.yyyy')</td>
-                                    <td>
-                                        <% if LastVisited %>
-                                            $LastVisited.Format('dd.MM.yyyy HH:mm')
-                                        <% else %>
-                                            <span class="text-muted">Nie</span>
-                                        <% end_if %>
-                                    </td>
-                                    <td class="text-center">
-                                        <a href="{$Top.Link}/?e=$ID" class="" title="Bearbeiten">
-                                            <i class="bx bx-edit-alt"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            <% end_loop %>
-                        </tbody>
-                    </table>
-                </div>
+                <% include MemberPageWorkerListTable %>
             </div>
         </div>
     <% end_if %>

@@ -39,7 +39,7 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
         'TotalAmount' => 'Decimal(19,2)',
         'IntroText' => 'Text',
         'OutroText' => 'Text',
-        'Status' => 'Enum("Draft,Sent,Paid", "Draft")',
+        'Status' => 'Int', //'Enum("Draft,Sent,Paid", "Draft")', 0=Draft, 1=Sent, 2=Paid, 
         'DueDate' => 'Date',
     ];
 
@@ -106,20 +106,18 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
 
     public function getTotalBrutto(): float|int
     {
-        return $this->getTotalNetto() + $this->getTotalTax();
+        $myBrutto = $this->getTotalNetto() + $this->getTotalTax();
+        // show always 2 decimal places
+        return (float) number_format($myBrutto, 2, '.', '');
     }
 
     public function getGermanStatus() {
-        switch ($this->Status) {
-            case 'Draft':
-                return 'Entwurf';
-            case 'Sent':
-                return 'Gesendet';
-            case 'Paid':
-                return 'Bezahlt';
-            default:
-                return $this->Status;
-        }
+        return match ($this->Status) {
+            0 => 'Entwurf',
+            1 => 'Gesendet',
+            2 => 'Bezahlt',
+            default => 'Unbekannt'
+        };
     }
 
     public function getPDF() {
@@ -146,7 +144,7 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
             $email->setBody(DBField::create_field('HTMLText', $config->EmailInvoiceText));
             $email->addAttachmentFromData($pdfContent, 'Rechnung-' . $this->InvoiceNumber . '.pdf', 'application/pdf');
             $email->send();
-            $this->Status = 'Sent';
+            //$this->Status = 1; // Sent
             $this->write();
             return true;
         }

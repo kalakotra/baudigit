@@ -1568,6 +1568,11 @@ form .message.good {
 }
 
 /* additional css */
+.form-holder {
+  padding: 2rem;
+  background-color: rgb(var(--bs-light-rgb));
+}
+
 form .message {
   --bs-alert-bg: transparent;
   --bs-alert-padding-x: 1rem;
@@ -1590,4 +1595,44 @@ form .message {
 img {
   max-width: 100%;
   height: auto;
+}
+
+form .signaturePart canvas {
+  background-color: var(--bs-light);
+}
+
+.dataTableMe {
+  border: 1px solid #dee2e6
+}
+/* odd add background color */
+.dataTableMe tbody tr:nth-child(odd) {
+  background-color: #dee2e6;
+}
+/* even add background color */
+.dataTableMe tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+
+.document-item a {
+  display: block;
+  text-align: center;
+  border: 2px dashed #ced4da;
+  padding: 1.5rem;
+  border-radius: 0.25rem;
+  color: #6c757d;
+  transition: all 0.3s ease-out;
+  height: 100%;
+}
+  .document-item a:hover {
+    background-color: #f8f9fa;
+    border-color: #008cff;
+    color: #008cff;
+    text-decoration: none;
+  }
+
+/* limit datalist height */
+datalist {
+  max-height: 150px;
+  overflow-y: auto;
 }

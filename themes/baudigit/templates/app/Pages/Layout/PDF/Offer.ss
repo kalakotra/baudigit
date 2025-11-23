@@ -87,14 +87,14 @@
                         <% loop OfferArticles %>
                             <tr class="borderme-top">
                                 <td class="border-primary">$Title</td>
-                                <td class="text-end">$getUnitLabel $Quantity</td>
+                                <td class="text-end"><small>$getUnitLabel</small> $Quantity</td>
                                 <td class="text-end">$formatPrice($SellPriceNetto)</td>
                                 <td class="text-end"> {$Discount}%</td>
                                 <td class="text-end">$formatPrice($FinalPrice)</td>
                             </tr>
                             <% if Description %>
                                 <tr class="">
-                                    <td colspan="5">$Description</td>
+                                    <td colspan="5"><small>$Description</small></td>
                                 </tr>
                             <% end_if %>
                         <% end_loop %>

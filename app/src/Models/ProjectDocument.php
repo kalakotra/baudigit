@@ -2,14 +2,15 @@
 
 namespace app\Models;
 
-use SilverStripe\ORM\DataObject;
 use SilverStripe\Assets\File;
-use SilverStripe\i18n\i18nEntityProvider;
-use Kalakotra\Utils\DataObjectPermissions;
-use SilverStripe\Security\PermissionProvider;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\DropdownField;
+use app\Models\ProjectDocumentCategory;
+use SilverStripe\i18n\i18nEntityProvider;
+use Kalakotra\Utils\DataObjectPermissions;
+use SilverStripe\Security\PermissionProvider;
 
 class ProjectDocument extends DataObject implements PermissionProvider, i18nEntityProvider
 {
@@ -41,10 +42,17 @@ class ProjectDocument extends DataObject implements PermissionProvider, i18nEnti
 
     private static $has_one = [
         'Project' => Project::class,
+        'ProjectDocumentCategory' => ProjectDocumentCategory::class,
     ];
 
     private static $many_many = [
         'Documents' => File::class,
+    ];
+
+    private static $many_many_extraFields = [
+        /*'Documents' => [
+            'WorkerVisible' => 'Int',
+        ],*/
     ];
 
     private static $owns = [

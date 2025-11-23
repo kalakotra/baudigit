@@ -2,8 +2,11 @@
 
 namespace app\Controllers;
 
+use app\Models\Offer;
 use app\Models\Client;
+use app\Models\Invoice;
 use app\Models\Project;
+use app\Models\ProjectTask;
 use app\Models\ClientObject;
 use SilverStripe\Forms\Form;
 use app\Models\ProjectMember;
@@ -17,10 +20,14 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\Security\Member;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\HiddenField;
+use SilverStripe\Forms\ListboxField;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\RequiredFields;
+use app\Models\ProjectDocumentCategory;
+use SilverStripe\Forms\CheckboxSetField;
 use SilverStripe\Forms\GroupedDropdownField;
 use UncleCheese\Dropzone\FileAttachmentField;
 use SilverStripe\AssetAdmin\Forms\UploadField;
@@ -33,12 +40,21 @@ class ProjectPageController extends \PageController
         'addMemberForm',
         'editMemberForm',
         'deleteMember',
+        'uploadDocuments',
         'addDocumentForm',
         'editDocumentForm',
-        'deleteDocument'
+        'deleteDocument',
+        'addTaskForm',
+        'editTaskForm',
+        'deleteTask',
     ];
 
     public function readAllInputs() {
+        $showOnlyStatus = $this->data()->ShowOnlyStatus;
+        $statusValue = $this->data()->StatusValue;
+        if ($showOnlyStatus) {
+            return Project::get()->filter('Status', $statusValue);
+        }
         return Project::get();
     }
 
@@ -77,7 +93,7 @@ class ProjectPageController extends \PageController
         $formFields = FieldList::create(
             TextField::create('Title', 'Titel')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             TextareaField::create('Description', 'Beschreibung')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setRows(4),
-            GroupedDropdownField::create('ClientObjectID', 'Kunde', $clientGroupedList)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select')->setEmptyString('-- bitte wählen --'),
+            GroupedDropdownField::create('ClientObjectID', 'Kunde', $clientGroupedList)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select select2me')->setEmptyString('-- bitte wählen --'),
             DateField::create('StartDate', 'Startdatum')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             DateField::create('EndDate', 'Enddatum')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             DropdownField::create('Status', 'Status', [
@@ -90,7 +106,7 @@ class ProjectPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-primary px-4  mb-2')
+            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
         );
 
         $required = RequiredFields::create([
@@ -100,14 +116,44 @@ class ProjectPageController extends \PageController
 
         $form = Form::create($this, 'add', $formFields, $action, $required);
 
+        if ($this->getRequest()->getVar('o')) {
+            if ($offer = Offer::get()->byID($this->getRequest()->getVar('o'))) {
+                $form->loadDataFrom([
+                    'Title' => 'Projekt zu Angebot ' . $offer->OfferNumber,
+                    'ClientObjectID' => $offer->ClientObjectID,
+                ]);
+
+                $formFields->push(
+                    HiddenField::create('OfferID', 'Angebot')->setValue($offer->ID)
+                );
+            }
+
+            // add cancel button/link
+            $action->push(
+                LiteralField::create('cancel', '<a href="javascript:history.back()" class="btn btn-secondary px-4 mb-2 ms-2">Abbrechen</a>')
+            );
+            
+        }
+
         return $form;
     }
 
     public function doAdd($data, $form) {
         $project = new Project();
         $form->saveInto($project);
-        $project->write();
+        
 
+        if (isset($data['OfferID']) && is_numeric($data['OfferID'])) {
+            $offer = Offer::get()->byID($data['OfferID']);
+            if ($offer && $offer->exists()) {
+                $offer->Status = 'Project';
+                $offer->write();
+                $project->OfferID = $offer->ID;
+            }
+        }
+
+        $project->write();
+        $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Projekt erfolgreich erstellt.');
         // redirect to edit page of the newly created project
         return $this->redirect($this->Link('?e=' . $project->ID));
     }
@@ -123,8 +169,12 @@ class ProjectPageController extends \PageController
             );
 
             $action = FieldList::create(
-                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-primary px-4 mb-2')
+                $submitAction = FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
             );
+
+            if ($project->Status == 2 || $project->Status == 3 || $project->Status == 4) {
+                $submitAction->setDisabled(true);
+            }
 
             $required = RequiredFields::create([
                 'Title',
@@ -141,22 +191,22 @@ class ProjectPageController extends \PageController
 
     public function doEdit($data, $form) {
         $project = $this->actProject();
-        if ($project) {
+        if ($project && !in_array($project->Status, [2, 3, 4])) {
             $form->saveInto($project);
             $project->write();
 
-            $form->sessionMessage('Projekt erfolgreich gespeichert.', 'good');
+            $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Projekt erfolgreich gespeichert.');
             return $this->redirectBack();
         }
 
-        $form->sessionMessage('Fehler beim Speichern des Projekts.', 'bad');
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Speichern des Projekts.');
         return $this->redirectBack();
     }
 
     public function getAllProjectMembers() {
         $project = $this->actProject();
         if ($project) {
-            return $project->ProjectMembers();
+            //return $project->ProjectMembers();
         }
         
         return false;
@@ -223,11 +273,11 @@ class ProjectPageController extends \PageController
             
             $projectMember->write();
 
-            $form->sessionMessage('Mitarbeiter erfolgreich hinzugefügt.', 'good');
+            $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Mitarbeiter erfolgreich hinzugefügt.');
             return $this->redirect($this->Link('?e=' . $project->ID.'&em=' . $projectMember->ID));
         }
         
-        $form->sessionMessage('Fehler beim Hinzufügen des Mitarbeiters.', 'bad');
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Hinzufügen des Mitarbeiters.');
         return $this->redirectBack();
     }
 
@@ -246,7 +296,7 @@ class ProjectPageController extends \PageController
                 );
 
                 $action = FieldList::create(
-                    FormAction::create('doEditMember', 'Speichern')->addExtraClass('btn btn-primary px-4 mb-2')
+                    FormAction::create('doEditMember', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
                 );
                 
                 $required = RequiredFields::create([
@@ -281,12 +331,12 @@ class ProjectPageController extends \PageController
                 
                 $projectMember->write();
 
-                $form->sessionMessage('Mitarbeiter erfolgreich gespeichert.', 'good');
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Mitarbeiter erfolgreich gespeichert.');
                 return $this->redirect($this->Link('?e=' . $projectMember->ProjectID.'&em=' . $projectMember->ID));
             }
         }
         
-        $form->sessionMessage('Fehler beim Speichern des Mitarbeiters.', 'bad');
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Speichern des Mitarbeiters.');
         return $this->redirectBack();
     }
 
@@ -334,6 +384,79 @@ class ProjectPageController extends \PageController
         return false;
     }
 
+    public function uploadDocuments() {
+        $project = $this->actProject();
+        if (!$project) {
+            return false;
+        }
+
+        $formFields = FieldList::create(
+            HiddenField::create('e', 'Projekt')->setValue($this->checkEdit()),
+            DropdownField::create('Category', 'Dokumenten-Kategorie', 
+                ProjectDocumentCategory::get()->map('ID', 'Name'))->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')->setEmptyString('-- bitte wählen --'),
+        );
+
+        $uploadFolder = $project->getUploadFolders()['doc'];
+        $formFields->push(
+            FileField::create('Documents[]', 'Dateien')
+                ->setFolderName($uploadFolder)
+                ->setAttribute('multiple', true)
+                ->addExtraClass('form-upload')
+                //->setAttribute('accept', '.xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf')
+        );
+
+        $action = FieldList::create(
+            FormAction::create('doUploadDocuments', 'Hochladen')->addExtraClass('btn btn-success px-4 mb-2')
+        );
+
+        $required = RequiredFields::create([
+            'Category',
+            'Documents'
+        ]);
+        
+        $form = Form::create($this, 'uploadDocuments', $formFields, $action, $required);
+
+        return $form;
+    }
+
+    public function doUploadDocuments($data, $form) {
+        $project = $this->actProject();
+        if ($project) {
+            if (isset($data['Documents']) && is_array($data['Documents'])) {
+
+                $documentsFolder = $project->getUploadFolders()['doc'];
+
+                $keys = array_keys($data['Documents']);
+                $file_count = count($data['Documents']['name']);
+                for ($i = 0; $i < $file_count; $i++) {
+                    $fileData = [];
+                    foreach ($keys as $key) {
+                        $fileData[$key] = $data['Documents'][$key][$i];
+                    }
+
+                    if ($fileData['tmp_name'] == '') {
+                        continue;
+                    }
+                    // Handle each uploaded file
+                    $file = new File();
+                    $file->setFromLocalFile($fileData['tmp_name'], $documentsFolder. '/' . $fileData['name']);
+                    $file->Title = $fileData['name'];
+                    $file->write();
+
+                    $project->Documents()->add($file, ['Category' => $data['Category']]);
+                }
+
+                $project->write();
+
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Dateien erfolgreich hochgeladen.');
+                return $this->redirect($this->Link('?e=' . $project->ID));
+            }
+        }
+
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Hochladen der Dateien.');
+        return $this->redirectBack();
+    }
+
     public function addDocumentForm() {
         $project = $this->actProject();
         if (!$project) {
@@ -341,16 +464,28 @@ class ProjectPageController extends \PageController
         }
 
         $formFields = FieldList::create(
-            TextField::create('Title', 'Dokumentationstitel')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
+            DropdownField::create('ProjectDocumentCategoryID', 'Dokumenten-Kategorie', 
+                ProjectDocumentCategory::get()->map('ID', 'Name'))->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')->setEmptyString('-- bitte wählen --'),
+            TextField::create('Title', 'Dokumentationstitel')->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
             CheckboxField::create('VisibleToWorker', 'Sichtbar für Arbeiter')->setFieldHolderTemplate('FormField_customholder')->setValue(true),
             HiddenField::create('e', 'Projekt')->setValue($this->checkEdit())
         );
 
+        $uploadFolder = $project->getUploadFolders()['doc'];
+        $formFields->push(
+            FileField::create('Documents[]', 'Dateien')
+                ->setFolderName($uploadFolder)
+                ->setAttribute('multiple', true)
+                ->addExtraClass('form-upload')
+                //->setAttribute('accept', '.xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf')
+        );
+
         $action = FieldList::create(
-            FormAction::create('doAddDocument', 'Speichern')->addExtraClass('btn btn-primary px-4 mb-2')
+            FormAction::create('doAddDocument', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
         );
         
         $required = RequiredFields::create([
+            'ProjectDocumentCategoryID',
             'Title'
         ]);
 
@@ -360,6 +495,8 @@ class ProjectPageController extends \PageController
     }
 
     public function doAddDocument($data, $form) {
+        print_r($data);
+        die();
         $project = $this->actProject();
         if ($project) {
             $projectDocument = new ProjectDocument();
@@ -368,11 +505,37 @@ class ProjectPageController extends \PageController
             
             $projectDocument->write();
 
-            $form->sessionMessage('Dokumenten-Kategorie erfolgreich hinzugefügt.', 'good');
-            return $this->redirectBack();
+            if (isset($data['Documents']) && is_array($data['Documents'])) {
+
+                $keys = array_keys($data['Documents']);
+                $file_count = count($data['Documents']['name']);
+                for ($i = 0; $i < $file_count; $i++) {
+                    $fileData = [];
+                    foreach ($keys as $key) {
+                        $fileData[$key] = $data['Documents'][$key][$i];
+                    }
+
+                    if ($fileData['tmp_name'] == '') {
+                        continue;
+                    }
+                    // Handle each uploaded file
+                    $file = new File();
+                    $file->setFromLocalFile($fileData['tmp_name'], 'project-documents/' . $projectDocument->ProjectID . '/' . $fileData['name']);
+                    $file->Title = $fileData['name'];
+                    $file->write();
+
+                    // Associate file with project document
+                    $projectDocument->Documents()->add($file);
+                }
+
+                $projectDocument->write();
+            }
+
+            $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Dokumenten-Kategorie erfolgreich hinzugefügt.');
+            return $this->redirect($this->Link('?e=' . $project->ID . '&ed=' . $projectDocument->ID));
         }
         
-        $form->sessionMessage('Fehler beim Hinzufügen der Dokumenten-Kategorie.', 'bad');
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Hinzufügen der Dokumenten-Kategorie.');
         return $this->redirectBack();
     }
 
@@ -386,15 +549,15 @@ class ProjectPageController extends \PageController
                 $formFields->push(
                     HiddenField::create('ed', 'ID')->setValue($id)
                 );
-
+                $uploadFolder = $projectDocument->Project()->getUploadFolders()['doc']. '/' . $id;
                 $formFields->push(
                     FileField::create('Documents[]', 'Dateien')
-                        ->setFolderName('project-documents/' . $projectDocument->ProjectID)
+                        ->setFolderName($uploadFolder)
                         ->setAttribute('multiple', true)
                 );
 
                 $action = FieldList::create(
-                    FormAction::create('doEditDocument', 'Speichern')->addExtraClass('btn btn-primary px-4 mb-2')
+                    FormAction::create('doEditDocument', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
                 );
                 
                 $required = RequiredFields::create([
@@ -444,12 +607,13 @@ class ProjectPageController extends \PageController
                     $projectDocument->write();
                 }
 
-                $form->sessionMessage('Dokumenten-Kategorie erfolgreich gespeichert.', 'good');
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Dokumenten-Kategorie erfolgreich gespeichert.');
+                
                 return $this->redirectBack();
             }
         }
         
-        $form->sessionMessage('Fehler beim Speichern der Dokumenten-Kategorie.', 'bad');
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Speichern der Dokumenten-Kategorie.');
         return $this->redirectBack();
     }
 
@@ -475,5 +639,152 @@ class ProjectPageController extends \PageController
         }
 
         return $this->redirectBack();
+    }
+
+    // task management methods
+
+    public function getAllProjectTasks() {
+        $project = $this->actProject();
+        if ($project) {
+            return $project->ProjectTasks();
+        }
+        
+        return false;
+    }
+
+    public function checkEditTask() {
+        if ($this->getRequest()->getVar('et')) {
+            return $this->getRequest()->getVar('et');
+        } else if ($this->getRequest()->postVar('et')) {
+            return $this->getRequest()->postVar('et');
+        }
+        return false;
+    }
+
+    public function addTaskForm() {
+        $project = $this->actProject();
+        if (!$project) {
+            return false;
+        }
+
+        // Get available members, only from worker group
+        $allMembers = Member::get()->filter('Groups.ID', '3')->sort('Surname, FirstName'); //->map('ID', 'Name');
+
+        $formFields = FieldList::create(
+            DropdownField::create('Status', 'Status', [
+                0 => 'Zu erledigen',
+                1 => 'In Bearbeitung',
+                2 => 'Erledigt',
+            ])->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select')->setValue(0),
+            TextField::create('Title', 'Titel')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
+            TextareaField::create('Description', 'Beschreibung')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setRows(4),
+            DateField::create('StartDate', 'Startdatum')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
+            DateField::create('EndDate', 'Enddatum')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
+            TextField::create('EstimatedHours', 'Geschätzte Stunden')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
+            CheckboxSetField::create('AssignedTo', 'Zugewiesen an', $allMembers),/*
+                ->setFieldHolderTemplate('FormField_customholder')
+                ->setAttribute('class', 'form-select')
+                ->setMultiple(true),*/
+            CheckboxField::create('NeedsConfirmation', 'Benötigt Bestätigung'),
+            HiddenField::create('e', 'Projekt')->setValue($this->checkEdit())
+        );
+
+        $action = FieldList::create(
+            FormAction::create('doAddTask', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+        );
+        
+        $required = RequiredFields::create([
+            'Title',
+            'StartDate',
+            'EndDate',
+            'AssignedTo'
+        ]);
+
+        $form = Form::create($this, 'addTaskForm', $formFields, $action, $required);
+
+        return $form;
+    }
+
+    public function doAddTask($data, $form) {
+        $project = $this->actProject();
+        if ($project) {
+            $projectTask = new ProjectTask();
+            $form->saveInto($projectTask);
+            $projectTask->ProjectID = $project->ID;
+            
+            $projectTask->write();
+
+            $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Aufgabe erfolgreich hinzugefügt.');
+            return $this->redirect($this->Link('?e=' . $project->ID . '&dt=' . $projectTask->ID));
+        }
+        
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Hinzufügen der Aufgabe.');
+        return $this->redirectBack();
+    }
+
+    public function editTaskForm() {
+        $id = $this->checkEditTask();
+        if ($id && is_numeric($id)) {
+            $projectTask = ProjectTask::get()->byID($id);
+            if ($projectTask) {
+                $allMembers = Member::get()->filter('Groups.ID', '3')->sort('Surname, FirstName'); //->map('ID', 'Name');
+                $selectedMembers = $projectTask->AssignedTo()->map('ID', 'ID')->toArray();
+
+                $addFields = $this->addTaskForm()->Fields();
+                $formFields = $addFields;
+                $formFields->push(
+                    HiddenField::create('et', 'ID')->setValue($id)
+                );
+
+                $action = FieldList::create(
+                    // add cancel button/link
+                    LiteralField::create('cancel', '<a href="'.$this->Link("?e=" . $projectTask->ProjectID).'" class="btn btn-secondary px-4 mb-2 me-2">Abbrechen</a>'),
+                    FormAction::create('doEditTask', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+                );
+                
+                $required = RequiredFields::create([
+                    'Title',
+                    'StartDate',
+                    'EndDate',
+                    'AssignedTo'
+                ]);
+
+                $form = Form::create($this, 'editTaskForm', $formFields, $action, $required);
+                $form->loadDataFrom($projectTask);
+                //$form->Fields()->dataFieldByName('AssignedTo')->setValue($selectedMembers);
+
+                return $form;
+            }
+        }
+    }
+
+    public function doEditTask($data, $form) {
+        $id = $this->checkEditTask();
+        if ($id && is_numeric($id)) {
+            $projectTask = ProjectTask::get()->byID($id);
+            if ($projectTask) {
+                $form->saveInto($projectTask);
+                
+                $projectTask->write();
+
+                // Handle assigned to members
+                /*if (isset($data['AssignedTo']) && is_array($data['AssignedTo'])) {
+                    $projectTask->AssignedTo()->setByIDList($data['AssignedTo']);
+                } else {
+                    $projectTask->AssignedTo()->removeAll();
+                }*/
+
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Aufgabe erfolgreich gespeichert.');
+                return $this->redirectBack();
+            }
+        }
+        
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Speichern der Aufgabe.');
+        return $this->redirectBack();
+    }
+
+
+    public function getProjectDocumentCategories() {
+        return ProjectDocumentCategory::get();
     }
 }

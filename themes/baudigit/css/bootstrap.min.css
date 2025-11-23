@@ -1847,8 +1847,15 @@ progress {
 	background-clip: padding-box;
 	border: var(--bs-border-width) solid var(--bs-border-color);
 	border-radius: var(--bs-border-radius);
-	transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out
+	transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
+
+div.form-control {
+	border: 0;
+	padding: 0px;
+	margin-top: 1rem;
+}
+
 @media (prefers-reduced-motion:reduce) {
 	.form-control {
 		transition: none
@@ -2019,7 +2026,7 @@ textarea.form-control-lg {
 .form-control-color.form-control-lg {
 	height: calc(1.5em + 1rem + calc(var(--bs-border-width) * 2))
 }
-.form-select {
+.form-select:not(div) {
 	--bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 	display: block;
 	width: 100%;
@@ -2041,41 +2048,41 @@ textarea.form-control-lg {
 	transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out
 }
 @media (prefers-reduced-motion:reduce) {
-	.form-select {
+	.form-select:not(div) {
 		transition: none
 	}
 }
-.form-select:focus {
+.form-select:not(div):focus {
 	border-color: #86b7fe;
 	outline: 0;
 	box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25)
 }
-.form-select[multiple], .form-select[size]:not([size="1"]) {
+.form-select[multiple]:not(div), .form-select[size]:not([size="1"]):not(div) {
 	padding-right: .75rem;
 	background-image: none
 }
-.form-select:disabled {
+.form-select:disabled:not(div) {
 	background-color: var(--bs-secondary-bg)
 }
-.form-select:-moz-focusring {
+.form-select:not(div):-moz-focusring {
 	color: transparent;
 	text-shadow: 0 0 0 var(--bs-body-color)
 }
-.form-select-sm {
+.form-select-sm:not(div) {
 	padding-top: .25rem;
 	padding-bottom: .25rem;
 	padding-left: .5rem;
 	font-size: .875rem;
 	border-radius: var(--bs-border-radius-sm)
 }
-.form-select-lg {
+.form-select-lg:not(div) {
 	padding-top: .5rem;
 	padding-bottom: .5rem;
 	padding-left: 1rem;
 	font-size: 1.25rem;
 	border-radius: var(--bs-border-radius-lg)
 }
-[data-bs-theme=dark] .form-select {
+[data-bs-theme=dark] .form-select:not(div) {
 	--bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")
 }
 .form-check {
@@ -3312,7 +3319,8 @@ textarea.form-control-lg {
 .btn-toolbar {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: flex-start
+	justify-content: flex-end;
+	margin-top: 1rem;
 }
 .btn-toolbar .input-group {
 	width: auto
@@ -3481,6 +3489,17 @@ textarea.form-control-lg {
 }
 .nav-fill .nav-item .nav-link, .nav-justified .nav-item .nav-link {
 	width: 100%
+}
+.tab-content {
+	--bs-nav-tabs-border-width: var(--bs-border-width);
+    --bs-nav-tabs-border-color: var(--bs-border-color);
+    --bs-tabs-content-border-radius: var(--bs-border-radius);
+	border: var(--bs-nav-tabs-border-width) solid var(--bs-nav-tabs-border-color);
+	border-top: 0;
+	border-bottom-right-radius: var(--bs-tabs-content-border-radius);
+	border-bottom-left-radius: var(--bs-tabs-content-border-radius);
+	padding-left: 1rem;
+	padding-right: 1rem;
 }
 .tab-content>.tab-pane {
 	display: none
@@ -3952,7 +3971,7 @@ textarea.form-control-lg {
 .card-body {
 	flex: 1 1 auto;
 	padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
-	color: var(--bs-card-color)
+	color: var(--bs-card-color);
 }
 .card-title {
 	margin-bottom: var(--bs-card-title-spacer-y);
@@ -4245,7 +4264,7 @@ textarea.form-control-lg {
 	--bs-pagination-disabled-border-color: var(--bs-border-color);
 	display: flex;
 	padding-left: 0;
-	list-style: none
+	list-style: none;
 }
 .page-link {
 	position: relative;

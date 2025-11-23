@@ -2,6 +2,7 @@
 
 namespace app\Controllers;
 
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
@@ -52,12 +53,13 @@ class MemberPageController extends \PageController
 
     public function add() {
         $formFields = FieldList::create(
-            TextField::create('FirstName', 'Vorname')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            TextField::create('Surname', 'Nachname')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            EmailField::create('Email', 'E-Mail')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            PasswordField::create('Password', 'Passwort')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setAttribute('autocomplete', 'new-password'),
-            PasswordField::create('PasswordConfirm', 'Passwort bestätigen')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setAttribute('autocomplete', 'new-password'),
-            DropdownField::create('GroupID', 'Benutzergruppe', $this->getGroupOptions())->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select')->setEmptyString('-- bitte wählen --')
+            CheckboxField::create('Active', 'Aktiv')->setFieldHolderTemplate('FormField_customCheckbox')->addExtraClass('form-check-input'),
+            TextField::create('FirstName', 'Vorname')->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
+            TextField::create('Surname', 'Nachname')->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
+            EmailField::create('Email', 'E-Mail')->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
+            PasswordField::create('Password', 'Passwort')->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control')->setAttribute('autocomplete', 'new-password'),
+            PasswordField::create('PasswordConfirm', 'Passwort bestätigen')->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control')->setAttribute('autocomplete', 'new-password'),
+            DropdownField::create('GroupID', 'Benutzergruppe', $this->getGroupOptions())->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')->setEmptyString('-- bitte wählen --')
         );
 
         $action = FieldList::create(
@@ -97,6 +99,7 @@ class MemberPageController extends \PageController
         $member->FirstName = $data['FirstName'];
         $member->Surname = $data['Surname'];
         $member->Email = $data['Email'];
+        $member->Active = isset($data['Active']) ? (bool)$data['Active'] : false;
         $member->changePassword($data['Password']);
         $member->write();
 
@@ -115,6 +118,10 @@ class MemberPageController extends \PageController
     public function edit() {
         $member = $this->actMember();
         if ($member) {
+            $addFields = $this->add()->Fields();
+            $formFields = $addFields;
+            $formFields->push(HiddenField::create('e', 'ID')->setValue($member->ID));
+
             // Get current group ID
             $currentGroupID = null;
             $memberGroups = $member->Groups()->filter('ID', [2, 3]);
@@ -122,7 +129,9 @@ class MemberPageController extends \PageController
                 $currentGroupID = $memberGroups->first()->ID;
             }
 
-            $formFields = FieldList::create(
+            $formFields->fieldByName('GroupID')->setValue($currentGroupID);
+
+            /*$formFields = FieldList::create(
                 TextField::create('FirstName', 'Vorname')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
                 TextField::create('Surname', 'Nachname')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
                 EmailField::create('Email', 'E-Mail')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
@@ -130,7 +139,7 @@ class MemberPageController extends \PageController
                 PasswordField::create('PasswordConfirm', 'Neues Passwort bestätigen')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setAttribute('autocomplete', 'new-password'),
                 DropdownField::create('GroupID', 'Benutzergruppe', $this->getGroupOptions())->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select')->setEmptyString('-- bitte wählen --')->setValue($currentGroupID),
                 HiddenField::create('e', 'ID')->setValue($member->ID)
-            );
+            );*/
 
             $action = FieldList::create(
                 FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-primary px-4 mb-2')
@@ -171,6 +180,7 @@ class MemberPageController extends \PageController
             $member->FirstName = $data['FirstName'];
             $member->Surname = $data['Surname'];
             $member->Email = $data['Email'];
+            $member->Active = isset($data['Active']) ? (bool)$data['Active'] : false;
 
             // Update password if provided
             if (!empty($data['Password'])) {

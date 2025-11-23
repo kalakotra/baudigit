@@ -24,11 +24,23 @@ class OfferArticle extends Article
     public function onBeforeWrite() {
         parent::onBeforeWrite();
         // calculate final price
+        
         $netPrice = $this->SellPriceNetto * $this->Quantity;
         $discountAmount = $netPrice * ($this->Discount / 100);
         $priceAfterDiscount = $netPrice - $discountAmount;
         $taxAmount = $priceAfterDiscount * ($this->TaxRate / 100);
         $this->FinalPrice = $priceAfterDiscount + $taxAmount;
+    }
+
+    public function onAfterWrite() {
+        parent::onAfterWrite();
+
+        // change offer status to Draft if not already
+        $offer = $this->Offer();
+        if ($offer && $offer->Status != 0) { // 0 = Draft
+            $offer->Status = 0; // set to Draft
+            $offer->write();
+        }
     }
 
     public function getDiscountedPrice(): float|int {

@@ -6,6 +6,7 @@ use Mpdf\Mpdf;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\TempFolder;
 use SilverStripe\Control\Director;
+use SilverStripe\Security\Security;
 use SilverStripe\SiteConfig\SiteConfig;
 
     use SilverStripe\CMS\Controllers\ContentController;
@@ -45,6 +46,11 @@ use SilverStripe\SiteConfig\SiteConfig;
             parent::init();
             // You can include any CSS or JS required by your project here.
             // See: https://docs.silverstripe.org/en/developer_guides/templates/requirements/
+        }
+
+        //return current user
+        public function currentUser() {
+            return Security::getCurrentUser();
         }
 
 
@@ -128,8 +134,8 @@ use SilverStripe\SiteConfig\SiteConfig;
             $mpdf = new Mpdf([
                 'mode' => 'utf-8',
                 'format' => [210, 297],
-                'margin_top' => 50,
-                'margin_bottom' => 40,
+                'margin_top' => 42,
+                'margin_bottom' => 26,
             ]);
 
             //$mpdf->setAutoTopMargin();
@@ -150,6 +156,26 @@ use SilverStripe\SiteConfig\SiteConfig;
             $mpdf->Output($path, 'F');
 
             return $path;
+        }
+
+        /**
+         * get notify session data
+         * @return array
+         */
+        public function getNotifySessionData() {
+            $session = $this->getRequest()->getSession();
+            $notifyData = $session->get('NotifyData');
+            // clear session data after getting it
+            $session->clear('NotifyData');
+            return $notifyData ? $this->customise($notifyData) : [];
+        }
+
+        public function setNotifySessionData($type, $icon, $message) {
+            $this->getRequest()->getSession()->set('NotifyData', [
+                'type' => $type,
+                'icon' => $icon,
+                'message' => $message
+            ]);
         }
     }
 }

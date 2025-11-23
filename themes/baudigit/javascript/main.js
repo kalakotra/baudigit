@@ -30,7 +30,7 @@ $(function () {
   /* menu */
 
   $(function () {
-    $('#sidenav').metisMenu();
+    //$('#sidenav').metisMenu();
   });
 
   $(".sidebar-close").on("click", function () {
@@ -142,13 +142,13 @@ $(function () {
 
 
   /* menu active */
-
+/*
   $(function () {
     for (var e = window.location, o = $(".metismenu li a").filter(function () {
       return this.href == e
     }).addClass("").parent().addClass("mm-active"); o.is("li");) o = o.parent("").addClass("mm-show").parent("").addClass("mm-active")
   });
-
+*/
 
   /* make event if input datalist is chosen */
   $("input[list='articleList']").on("input", function () {
@@ -225,6 +225,31 @@ $(function () {
     return true;
   });
 
+  // add signature fields
+  $(".signature-field").each(function() {
+    var signaturePartDiv = $(this).find(".signaturePart");
+    signaturePartDiv.jSignature({'height': 150, 'width': 300,color:"#000000",lineWidth:1});
+    signaturePartDiv.bind('change', function(e) {
+      //var datapair = signaturePartDiv.jSignature("getData", "base30");
+      var datapair = signaturePartDiv.jSignature("getData", "svgbase64");
+      var datapair = "data:" + datapair[0] + "," + datapair[1];
+      $(this).closest(".signature-field").find("textarea").val(datapair);
+      
+      //var signatureImage = $(this).closest(".signature-field").find("img[id$='_signatureImage']");
+      //signatureImage.attr("src", datapair);
+      //signatureImage.show();
+    });
+
+    // clear button
+    $(this).find(".clearSignature").click(function() {
+      signaturePartDiv.jSignature("reset");
+      $(this).closest(".signature-field").find("textarea").val("");
+      //var signatureImage = $(this).closest(".signature-field").find("img[id$='_signatureImage']");
+      //signatureImage.attr("src", "");
+      //signatureImage.hide();
+    });
+  });
+
   if ($('#calendarMembers').length) {
     setTimeout(function() {
       var calendarEl = document.getElementById('calendarMembers');
@@ -241,17 +266,31 @@ $(function () {
           title: $(this).data('name'),
           start: $(this).data('start'),
           end: $(this).data('end'),
-          color: $(this).data('color')
+          color: $(this).data('color'),
+          url: $(this).data('url'),
+          extendedProps: {
+            address: $(this).data('address'),
+            popover: $(this).data('popover'),
+          }
         });
       });
       
       var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
+        initialView: 'listWeek',
         locale: 'de',
         headerToolbar: {
           left: 'prev,next today',
           center: 'title',
           right: false
+        },
+        height: 600,
+        weekends: false,
+        eventDisplay: 'block',
+        eventClick: function(event) {
+            if (event.event.url) {
+              event.jsEvent.preventDefault();
+              window.open(event.event.url, "_blank");
+            }
         },
         visibleRange: visibleRange,
         events: events
@@ -260,4 +299,63 @@ $(function () {
     }, 250);
   } 
   // end calendar
+
+
+  // datatables
+  if ($('.dataTableMe').length) {
+    $('.dataTableMe').DataTable({
+      "language": {
+        "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/de-DE.json"
+      },
+      responsive: true,
+      //dom: 'Bfrtip',
+      //buttons: [ 'excel', 'pdf', 'print']
+    });
+    //table.buttons().container().appendTo( '#offerListTable_paginate' );
+  }
+
+  // end datatables
+
+
+  // select2 for dropdowns
+  if ($('.select2me').length) {
+    $('select.select2me').select2({
+      theme: 'bootstrap-5',
+      width: '100%'
+    });
+  }
+
+  /*
+  theme: "bootstrap-5",
+        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+        placeholder: $( this ).data( 'placeholder' ),
+         */
+
+  // end select2
+
+  // image uploadify
+  if ($('.form-upload').length) {
+    //$('.form-upload').imageuploadify();
+  }
+
+  // end image uploadify
+
+  /* notify me */
+  if ($('notification').length) {
+    $('notification').each(function() {
+      var type = $(this).attr('type') || 'info';
+      var icon = $(this).attr('icon') || 'bi bi-info-circle';
+      var message = $(this).attr('message') || '';
+    Lobibox.notify(type, {
+      pauseDelayOnHover: true,
+      continueDelayOnInactiveTab: false,
+      position: 'top right',
+      width: 300,
+      icon: icon,
+      title: '',
+      msg: message
+    });
+    });
+  }  /* end notify me */
+
 });

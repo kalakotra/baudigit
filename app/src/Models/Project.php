@@ -4,11 +4,14 @@ namespace app\Models;
 
 use app\Models\Offer;
 use app\Models\Client;
+use app\Models\ProjectTask;
 use app\Models\ProjectMember;
+use SilverStripe\Assets\File;
 use app\Models\ProjectDocument;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Forms\DropdownField;
+use app\Models\ProjectDocumentCategory;
 use SilverStripe\i18n\i18nEntityProvider;
 use Kalakotra\Utils\DataObjectPermissions;
 use SilverStripe\Security\PermissionProvider;
@@ -53,7 +56,26 @@ class Project extends DataObject implements PermissionProvider, i18nEntityProvid
 
     private static $has_many = [
         'ProjectDocuments' => ProjectDocument::class,
-        'ProjectMembers' => ProjectMember::class,
+        'ProjectTasks' => ProjectTask::class,
+    ];
+
+    private static $many_many = [
+        'Documents' => File::class,
+    ];
+
+    private static $owns = [
+        'Documents',
+    ];
+
+    private static $cascade_deletes = [
+        'ProjectDocuments',
+        'ProjectTasks',
+    ];
+
+    private static $many_many_extraFields = [
+        'Documents' => [
+            'Category' => 'Int',
+        ],
     ];
 
     private static $summary_fields = [
@@ -123,13 +145,20 @@ class Project extends DataObject implements PermissionProvider, i18nEntityProvid
         return $fields;
     }
 
+    public function getUploadFolders() {
+        return [
+            'doc' => 'projects/' . $this->ID . '/documents',
+            'task' => 'projects/' . $this->ID . '/tasks',
+        ];
+    }
+
     /**
      * Get all members assigned to this project
      */
     public function getAssignedMembers()
     {
-        return Member::get()->innerJoin('app_ProjectMember', 'app_ProjectMember.MemberID = Member.ID')
-            ->where(['app_ProjectMember.ProjectID' => $this->ID]);
+        /*return Member::get()->innerJoin('app_ProjectMember', 'app_ProjectMember.MemberID = Member.ID')
+            ->where(['app_ProjectMember.ProjectID' => $this->ID]);*/
     }
 
     /**
@@ -137,10 +166,10 @@ class Project extends DataObject implements PermissionProvider, i18nEntityProvid
      */
     public function getMembersForDateRange($startDate, $endDate)
     {
-        return $this->ProjectMembers()->filter([
+        /*return $this->ProjectMembers()->filter([
             'StartDate:LessThanOrEqual' => $endDate,
             'EndDate:GreaterThanOrEqual' => $startDate
-        ]);
+        ]);*/
     }
 
     /**
@@ -155,6 +184,23 @@ class Project extends DataObject implements PermissionProvider, i18nEntityProvid
             $filter['EndDate:GreaterThanOrEqual'] = $startDate;
         }
         
-        return $this->ProjectMembers()->filter($filter)->count() > 0;
+        //return $this->ProjectMembers()->filter($filter)->count() > 0;
+    }
+
+    /**
+     * Check if project can be closed // if all tasks are completed
+     * @return bool
+     */
+    public function canBeClosed(): bool {
+        $filter = ['Status:not' => 2]; // not completed
+        return $this->ProjectTasks()->filter($filter)->count() > 0;
+    }
+
+    /**
+     * check if projectTasks & ProjectDocuments cann be added
+     * @return bool
+     */
+    public function canAddTasksAndDocuments(): bool {
+        return !in_array($this->Status, [2,3,4]); // not Completed, Billed, Canceled
     }
 }

@@ -2,12 +2,15 @@
 
 namespace app\Controllers;
 
-use app\Models\Invoice;
+use app\Models\Offer;
 use app\Models\Client;
 use app\Models\Article;
+use app\Models\Invoice;
+use app\Models\Project;
+use app\Pages\InvoicePage;
 use app\Models\ClientObject;
-use app\Models\InvoiceArticle;
 use SilverStripe\Forms\Form;
+use app\Models\InvoiceArticle;
 use SilverStripe\ORM\DataList;
 use SilverStripe\Forms\DateField;
 use SilverStripe\Forms\FieldList;
@@ -15,6 +18,7 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\ListboxField;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\TextareaField;
@@ -35,6 +39,11 @@ class InvoicePageController extends \PageController
     ];
 
     public function readAllInputs() {
+        $showOnlyStatus = $this->data()->ShowOnlyStatus;
+        $statusValue = $this->data()->StatusValue;
+        if ($showOnlyStatus) {
+            return Invoice::get()->filter('Status', $statusValue);
+        }
         return Invoice::get();
     }
 
@@ -89,13 +98,36 @@ class InvoicePageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-primary px-4  mb-2')
+            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
         );
 
         $required = RequiredFields::create([
             'InvoiceNumber',
             'ClientObjectID',
         ]);
+
+        // check if invoice is created from project
+        if ($this->getRequest()->getVar('p') && is_numeric($this->getRequest()->getVar('p'))) {
+            $projectID = $this->getRequest()->getVar('p');
+            if ($project = Project::get()->byID($projectID)) {
+                // set clientobjectid from project
+                $formFields->dataFieldByName('ClientObjectID')->setValue($project->ClientObjectID);                
+
+                if ($project->OfferID) {
+                    // set offer if project has one
+                    $formFields->push(
+                        HiddenField::create('OfferID', 'Angebot')->setValue($project->OfferID)
+                    );
+                }
+            }   
+            $formFields->push(
+                HiddenField::create('ProjectID', 'Projekt')->setValue($projectID)
+            );
+            // add cancel button/link
+            /*$action->push(
+                LiteralField::create('cancel', '<a href="javascript:history.back()" class="btn btn-secondary px-4 mb-2 ms-2">Abbrechen</a>')
+            );*/
+        }
 
         $form = Form::create($this, 'add', $formFields, $action, $required);
 
@@ -106,6 +138,17 @@ class InvoicePageController extends \PageController
         $invoice = new Invoice();
         $form->saveInto($invoice);
         $invoice->write();
+
+        if ($data['ProjectID'] && $data['ProjectID'] != '') {
+            // if invoice is created from project, copy all offer articles to invoice articles
+            if ($project = Project::get()->byID($data['ProjectID'])) {
+                $invoice->ProjectID = $project->ID;
+                $invoice->write();
+                if ($project->OfferID) {
+                    $this->offerToInvoice($project->OfferID, $invoice->ID);
+                }
+            }
+        }
 
         // redirect to edit page of the newly created invoice
         return $this->redirect($this->Link('?e=' . $invoice->ID));
@@ -122,7 +165,7 @@ class InvoicePageController extends \PageController
             );
 
             $action = FieldList::create(
-                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-primary px-4 mb-2')
+                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
             );
 
             $required = RequiredFields::create([
@@ -144,11 +187,11 @@ class InvoicePageController extends \PageController
             $form->saveInto($invoice);
             $invoice->write();
 
-            $form->sessionMessage('Rechnung erfolgreich gespeichert.', 'good');
+            $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Rechnung erfolgreich gespeichert.');
             return $this->redirectBack();
         }
 
-        $form->sessionMessage('Fehler beim Speichern der Rechnung.', 'bad');
+        $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Fehler beim Speichern der Rechnung.');
         return $this->redirectBack();
     }
 
@@ -201,7 +244,7 @@ class InvoicePageController extends \PageController
             //HiddenField::create('BuyPriceBrutto', 'Einkaufspreis brutto')->setReadonly(true)->setDescription('Wird automatisch aus dem Nettopreis und der MwSt. berechnet.')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             NumericField::create('SellPriceNetto', 'Preis (netto)')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             //NumericField::create('SellPriceBrutto', 'Preis')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            NumericField::create('TaxRate', 'MwSt. (%)', $config->InvoiceTax)->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true),
+            NumericField::create('TaxRate', 'MwSt. (%)', $config->InvoiceTax)->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'), //->setReadonly(true),
             TextareaField::create('Description', 'Beschreibung')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setRows(2),
             
             HiddenField::create('SourceArticleID'),
@@ -209,7 +252,7 @@ class InvoicePageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAddArticle', 'Hinzufügen')->addExtraClass('btn btn-primary px-4 mb-2')
+            FormAction::create('doAddArticle', 'Hinzufügen')->addExtraClass('btn btn-success px-4 mb-2')
         );
         $required = RequiredFields::create([
             'Quantity',
@@ -235,11 +278,11 @@ class InvoicePageController extends \PageController
                 $article->InvoiceID = $invoice->ID;
                 $article->write();
 
-                $form->sessionMessage('Artikel erfolgreich hinzugefügt.', 'good');
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich gespeichert.');
                 return $this->redirectBack();
             }
         }
-        $form->sessionMessage('Fehler beim Hinzufügen des Artikels.', 'bad');
+        $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Fehler beim Hinzufügen des Artikels.');
         return $this->redirectBack();
     }
 
@@ -254,7 +297,7 @@ class InvoicePageController extends \PageController
                 );
 
                 $action = FieldList::create(
-                    FormAction::create('doEditArticle', 'Speichern')->addExtraClass('btn btn-primary px-4  mb-2')
+                    FormAction::create('doEditArticle', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
                 );
                 $required = RequiredFields::create([
                     'Quantity',
@@ -282,11 +325,11 @@ class InvoicePageController extends \PageController
                 $form->saveInto($invoiceArticle);
                 $invoiceArticle->write();
 
-                $form->sessionMessage('Artikel erfolgreich gespeichert.', 'good');
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich gespeichert.');
                 return $this->redirect($this->Link('?e=' . $invoiceArticle->InvoiceID));
             }
         }
-        $form->sessionMessage('Fehler beim Speichern des Artikels.', 'bad');
+        $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Fehler beim Speichern des Artikels.');
         return $this->redirectBack();
     }
 
@@ -302,8 +345,10 @@ class InvoicePageController extends \PageController
         $invoice = $this->actInvoice();
         if ($invoice) {
             if ($invoice->sendInvoiceEmail()) {
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Rechnung erfolgreich versendet.');
                 return $this->redirect($this->Link('?e=' . $invoice->ID.'&sent=1'));
             } else {
+                $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Fehler beim Versenden der Rechnung.');
                 return $this->redirect($this->Link('?e=' . $invoice->ID.'&sent=0'));
             }
         }
@@ -315,5 +360,30 @@ class InvoicePageController extends \PageController
             return $sent = $this->getRequest()->getVar('sent');
         }
         return null;
+    }
+
+
+    public function offerToInvoice($offerID, $invoiceID) {
+        $offer = Offer::get()->byID($offerID);
+        $invoice = Invoice::get()->byID($invoiceID);
+        if ($offer && $invoice) {
+
+            // Copy all offer articles to invoice articles
+            $offerArticles = $offer->OfferArticles();
+            foreach ($offerArticles as $offerArticle) {
+                $invoiceArticle = new InvoiceArticle();
+                $invoiceArticle->InvoiceID = $invoice->ID;
+                $invoiceArticle->Title = $offerArticle->Title;
+                $invoiceArticle->Description = $offerArticle->Description;
+                $invoiceArticle->Quantity = $offerArticle->Quantity;
+                $invoiceArticle->Unit = $offerArticle->Unit;
+                $invoiceArticle->SellPriceNetto = $offerArticle->SellPriceNetto;
+                $invoiceArticle->Discount = $offerArticle->Discount;
+                $invoiceArticle->TaxRate = $offerArticle->TaxRate;
+                $invoiceArticle->FinalPrice = $offerArticle->FinalPrice;
+                $invoiceArticle->SourceArticleID = $offerArticle->SourceArticleID;
+                $invoiceArticle->write();
+            }
+        }
     }
 }

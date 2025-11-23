@@ -46,7 +46,7 @@ class Client extends DataObject implements PermissionProvider, i18nEntityProvide
 
     private static $has_many = [
         'ClientObjects' => ClientObject::class,
-        'Projects' => Project::class,
+        //'Projects' => Project::class,
     ];
 
     private static $summary_fields = [

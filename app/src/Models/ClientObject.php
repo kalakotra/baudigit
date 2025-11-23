@@ -1,9 +1,10 @@
-<?php
+<?php 
 
 namespace app\Models;
 
 use app\Models\Client;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\i18n\i18nEntityProvider;
 use Kalakotra\Utils\DataObjectPermissions;
 use SilverStripe\Security\PermissionProvider;
@@ -80,7 +81,10 @@ class ClientObject extends DataObject implements PermissionProvider, i18nEntityP
 
     public function getFullName()
     {
-        return $this->Client->Name . ' - ' . $this->Name . ' (' . $this->Address . ')';
+        return DBField::create_field(
+            'HTMLVarchar',
+            $this->Client()->Name . ' - ' . $this->Name . ' (' . $this->Address . ')'
+        );
     }
 
     public function getNameForPDF()

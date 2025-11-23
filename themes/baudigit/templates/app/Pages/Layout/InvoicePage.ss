@@ -3,8 +3,16 @@
         <div class="card-header">
             <div class="row">
                 <div class="col-12 col-lg-6">
-                    <a href="{$Top.Link}/previewPDF?e={$checkEdit}" class="btn btn-secondary px-4" target="_blank"><i class="bx bx-search " ></i>Vorschau</a>
-                    <a href="{$Top.Link}/send?e={$checkEdit}" class="btn btn-secondary px-4 yousure" ><i class="bx bx-envelope " ></i>Versenden</a>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success" data-bs-toggle="dropdown">Options</button>
+                        <button type="button" class="btn btn-success split-bg-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">	<span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end">
+                            <a href="{$Top.Link}/previewPDF?e={$checkEdit}" class="dropdown-item" target="_blank"><i class="bx bx-search " ></i>Vorschau</a>
+                            <a href="{$Top.Link}/send?e={$checkEdit}" class="dropdown-item yousure" ><i class="bx bx-envelope " ></i>Versenden</a>
+                        </div>
+                    </div>
+                    
                 </div>
                 <div class="col-12 col-lg-6 text-end">
                     <a href="{$Top.Link}" class="btn btn-primary px-4">Zurück zur Übersicht</a>
@@ -12,102 +20,43 @@
             </div>
         </div>
     </div>
-    <% if getSentStatus=1 %>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            Die Rechnung wurde erfolgreich versendet.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <% end_if %>
+    
     <div class="card">
         <div class="card-body">
-            <div class="form-body">
-                <div class="accordion" id="invoiceArticleFormAccordion">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="invoiceFormHeading">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#invoiceFormCollapse" aria-expanded="false" aria-controls="invoiceFormCollapse">
-                                Rechnungsdaten ($actInvoice.getGermanStatus)
-                            </button>
-                        </h2>
-                        <div id="invoiceFormCollapse" class="accordion-collapse collapse" aria-labelledby="invoiceFormHeading" data-bs-parent="#invoiceArticleFormAccordion">
-                            <div class="accordion-body">
-                                $edit
+            <ul class="nav nav-tabs nav-primary" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#invoice_home" role="tab" aria-selected="true">
+                        <div class="d-flex align-items-center">
+                            <div class="tab-icon">
+                                <i class="bi bi-house-door me-1 fs-6"></i>
                             </div>
+                            <div class="tab-title">Rechnungsdaten ($actInvoice.getGermanStatus)</div>
                         </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="invoiceArticleFormHeading">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#invoiceArticleFormCollapse" aria-expanded="true" aria-controls="invoiceArticleFormCollapse">
-                                Artikel zur Rechnung hinzufügen / bearbeiten
-                            </button>
-                        </h2>
-                        <div id="invoiceArticleFormCollapse" class="accordion-collapse collapse show" aria-labelledby="invoiceArticleFormHeading" data-bs-parent="#invoiceArticleFormAccordion">
-                            <div class="accordion-body">
-                                <% if checkEditArticle %>
-                                    $editArticleForm
-                                <% else %>
-                                    $addArticleForm
-                                <% end_if %>
-                                <hr />
-                                <table id="invoiceArticleTable" class="table table-striped table-bordered" style="width:100%">
-                                    <thead>
-                                        <tr>
-                                            <th>Titel</th>
-                                            <th>Menge</th>
-                                            <th class="text-end">Preis (netto)</th>
-                                            <th class="text-end">Rabatt</th>
-                                            <th class="text-end">MwSt.</th>
-                                            <th class="text-end">Gesamtpreis</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% loop getAllInvoiceArticles %>
-                                            <tr>
-                                                <td>$Title</td>
-                                                <td>$Quantity $getUnitLabel</td>
-                                                <td class="text-end">$formatPrice($SellPriceNetto)</td>
-                                                <td class="text-end"> ({$Discount}%) $formatPrice($getDiscountAmount)</td>
-                                                <td class="text-end"> ({$TaxRate}%) $formatPrice($getTaxAmount)</td>
-                                                <td class="text-end">$formatPrice($FinalPrice)</td>
-                                                <td class="text-center"><a href="{$Top.Link}/?e=$InvoiceID&ea=$ID" class=""><i class="bx bx-edit-alt fs-4"></i></a><a href="{$Top.Link}/deleteArticle?e=$InvoiceID&da=$ID" class="yousure"><i class="bx bx-x-circle text-danger fs-4"></i></a></td>
-                                            </tr>
-                                        <% end_loop %>
-                                    </tbody>
-                                    <% with actInvoice %>
-                                    <tfoot>
-                                        <tr>
-                                            <th colspan="5" class="text-end">Gesamt (netto):</th>
-                                            <th class="text-end">$Top.formatPrice($getTotalNetto)</th>
-                                            <th></th>
-                                        </tr>
-                                        <tr>
-                                            <th colspan="5" class="text-end">Gesamt MwSt.:</th>
-                                            <th class="text-end">$Top.formatPrice($getTotalTax)</th>
-                                            <th></th>
-                                        </tr>
-                                        <tr>
-                                            <th colspan="5" class="text-end">Gesamt (brutto):</th>
-                                            <th class="text-end">$Top.formatPrice($getTotalBrutto)</th>
-                                            <th></th>
-                                        </tr>
-                                    </tfoot>
-                                    <% end_with %>
-                                </table>
-                                
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" data-bs-toggle="tab" href="#invoice_article" role="tab" aria-selected="false">
+                        <div class="d-flex align-items-center">
+                            <div class="tab-icon"><i class="bi bi-list-task me-1 fs-6"></i>
                             </div>
+                            <div class="tab-title">Artikel</div>
                         </div>
-                    </div>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content py-3">
+                <div class="tab-pane fade show active" id="invoice_home" role="tabpanel">
+                    <%-- Project edit form --%>
+                    $edit
+                </div>
+                <div class="tab-pane fade" id="invoice_article" role="tabpanel">
+                    <% include Includes/InvoicePage/InvoicePageArticleForms %>
+                    <hr />
+                    <% include Includes/InvoicePage/InvoicePageArticleTable %>
                 </div>
             </div>
         </div>
     </div>
-    <%-- datalist of articles    --%>
-    <datalist id="articleList">
-        <option data-id="0" data-unit="0" data-nettoprice="0" value=""></option>
-        <% loop getAllArticles %>
-            <option data-id="$ID" data-unit="$Unit" data-nettoprice="$SellPriceNetto" data-title="$Title" value="$Title || $InternalID || $formatPrice($SellPriceNetto)"></option>
-        <% end_loop %>
-    </datalist>
 <% else %>
     <% if $checkAdd %>
         <div class="card">
@@ -125,39 +74,12 @@
     <% else %>
         <div class="card">
             <div class="card-header text-end">
-                <a type="button" class="btn btn-primary px-4" href="{$Top.Link}/?a=1">Rechnung erstellen</a>
+                <a type="button" class="btn btn-success px-4" href="{$Top.Link}/?a=1">Rechnung erstellen</a>
             </div>
         </div>
         <div class="card">
             <div class="card-body">
-                <div class="table-responsive">
-                    <table id="example" class="table table-striped table-bordered" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Rechnungsnummer</th>
-                                <th>Kunde</th>
-                                <th>Datum</th>
-                                <th>Fälligkeitsdatum</th>
-                                <th>Gesamt (brutto)</th>
-                                <th>Status</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% loop readAllInputs %>
-                                <tr>
-                                    <td>$InvoiceNumber</td>
-                                    <td>$ClientObject.getFullName</td>
-                                    <td>$Created.Format('dd.MM.yyyy')</td>
-                                    <td>$DueDate.Format('dd.MM.yyyy')</td>
-                                    <td>$getTotalBrutto</td>
-                                    <td>$getGermanStatus</td>
-                                    <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt"></i></a></td>
-                                </tr>
-                            <% end_loop %>
-                        </tbody>
-                    </table>
-                </div>
+                <% include Includes/InvoicePage/InvoicePageInvoiceListTable %>
             </div>
         </div>
     <% end_if %>

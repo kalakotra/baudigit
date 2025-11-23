@@ -14,16 +14,44 @@
       <div class="sidebar-nav">
           <!--navigation-->
           <ul class="metismenu" id="sidenav">
-			<%--
-			<li class="menu-label">UI Elements</li>
-			--%>
-			<% loop $Menu(1) %>
-				<li>
-					<a href="$Link">
-						<div class="menu-title">$MenuTitle.XML</div>
-					</a>
-				</li>
-			<% end_loop %>
+            <%--
+            <li class="menu-label">UI Elements</li>
+            --%>
+            <% loop $Menu(1) %>
+              <% if MenuSeparator %>
+                <li class="menu-label">$MenuSeparator</li>
+              <% end_if %>
+              <li>
+                <% if Children && $LinkingMode!='link' %>
+                  <a href="javascript:;" >
+                    <div class="parent-icon">
+                    </div>
+                    <div class="menu-title">
+                      <% if MenuIcon %>
+                        <i class="$MenuIcon"></i>
+                      <% end_if %>
+                      $MenuTitle.XML
+                    </div>
+                  </a>
+                  <ul>
+                    <% loop Children %>
+                      <li>
+                        <a href="$Link"><i class="material-icons-outlined">arrow_right</i>$MenuTitle.XML</a>
+                      </li>
+                    <% end_loop %>
+                  </ul>
+                <% else %>
+                  <a href="$Link">
+                    <div class="menu-title">
+                      <% if MenuIcon %>
+                        <i class="$MenuIcon"></i>
+                      <% end_if %>
+                      $MenuTitle.XML
+                    </div>
+                  </a>
+                <% end_if %>
+              </li>
+            <% end_loop %>
            </ul>
           <!--end navigation-->
       </div>

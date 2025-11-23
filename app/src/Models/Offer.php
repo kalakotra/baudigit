@@ -43,7 +43,7 @@ class Offer extends DataObject implements PermissionProvider, i18nEntityProvider
         'OutroText' => 'Text',
         'TotalNetto' => 'Decimal(19,2)',
         'TotalBrutto' => 'Decimal(19,2)',
-        'Status' => "Enum('Draft, Sent, Accepted, Project, Rejected', 'Draft')",
+        'Status' => 'Int', //"Enum('Draft, Sent, Accepted, Project, Rejected', 'Draft')", 0=Draft, 1=Sent, 2=Accepted, 3=Project, 4=Rejected
     ];
 
     private static $has_one = [
@@ -140,18 +140,14 @@ class Offer extends DataObject implements PermissionProvider, i18nEntityProvider
     }
 
     public function getGermanStatus() {
-        switch ($this->Status) {
-            case 'Draft':
-                return 'Entwurf';
-            case 'Sent':
-                return 'Gesendet';
-            case 'Accepted':
-                return 'Akzeptiert';
-            case 'Rejected':
-                return 'Abgelehnt';
-            default:
-                return $this->Status;
-        }
+        return match ($this->Status) {
+            0 => 'Entwurf',
+            1 => 'Gesendet',
+            2 => 'Akzeptiert',
+            3 => 'Projekt',
+            4 => 'Abgelehnt',
+            default => 'Unbekannt',
+        };
     }
 
     public function getPDF() {
@@ -178,7 +174,7 @@ class Offer extends DataObject implements PermissionProvider, i18nEntityProvider
             $email->setBody(DBField::create_field('HTMLText', $config->EmailOfferText));
             $email->addAttachmentFromData($pdfContent, 'Angebot-' . $this->OfferNumber . '.pdf', 'application/pdf');
             $email->send();
-            $this->Status = 'Sent';
+            $this->Status = 1; //Sent
             $this->write();
             return true;
         }

@@ -39,6 +39,12 @@ class OfferPageController extends \PageController
     ];
 
     public function readAllInputs() {
+        // if ShowOnlyStatus filter is set, filter offers by status
+        $showOnlyStatus = $this->data()->ShowOnlyStatus;
+        $statusValue = $this->data()->StatusValue;
+        if ($showOnlyStatus) {
+            return Offer::get()->filter('Status', $statusValue);
+        }
         return Offer::get();
     }
 
@@ -85,15 +91,15 @@ class OfferPageController extends \PageController
         // valid next 30 days
         $validUntil = date('Y-m-d', strtotime('+30 days'));
         $formFields = FieldList::create(
-            TextField::create('OfferNumber', 'Angebotsnummer', $nextOfferNumber)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true),
-            DateField::create('ValidUntil', 'Gültig bis', $validUntil)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            GroupedDropdownField::create('ClientObjectID', 'Kunde', $clientGroupedList)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select')->setEmptyString('-- bitte wählen --'),
-            TextareaField::create('IntroText', 'Einleitungstext', $config->OfferIntroText)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            TextareaField::create('OutroText', 'Schlusstext', $config->OfferOutroText)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
+            TextField::create('OfferNumber', 'Angebotsnummer', $nextOfferNumber)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control')->setReadonly(true),
+            DateField::create('ValidUntil', 'Gültig bis', $validUntil)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
+            GroupedDropdownField::create('ClientObjectID', 'Kunde', $clientGroupedList)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select select2me')->setEmptyString('-- bitte wählen --'),
+            TextareaField::create('IntroText', 'Einleitungstext', $config->OfferIntroText)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
+            TextareaField::create('OutroText', 'Schlusstext', $config->OfferOutroText)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
         );
 
         $action = FieldList::create(
-            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-primary px-4  mb-2')
+            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
         );
 
         $required = RequiredFields::create([
@@ -111,6 +117,7 @@ class OfferPageController extends \PageController
         $form->saveInto($offer);
         $offer->write();
 
+        $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Angebot erfolgreich erstellt.');
         // redirect to edit page of the newly created offer
         return $this->redirect($this->Link('?e=' . $offer->ID));
     }
@@ -126,7 +133,7 @@ class OfferPageController extends \PageController
             );
 
             $action = FieldList::create(
-                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-primary px-4 mb-2')
+                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
             );
 
             $required = RequiredFields::create([
@@ -148,11 +155,12 @@ class OfferPageController extends \PageController
             $form->saveInto($offer);
             $offer->write();
 
-            $form->sessionMessage('Angebot erfolgreich gespeichert.', 'good');
+            // set NotifyData
+            $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Angebot erfolgreich gespeichert.');
             return $this->redirectBack();
         }
 
-        $form->sessionMessage('Fehler beim Speichern des Angebots.', 'bad');
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Speichern des Angebots.');
         return $this->redirectBack();
     }
 
@@ -213,7 +221,7 @@ class OfferPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAddArticle', 'Hinzufügen')->addExtraClass('btn btn-primary px-4 mb-2')
+            FormAction::create('doAddArticle', 'Hinzufügen')->addExtraClass('btn btn-success px-4 mb-2')
         );
         $required = RequiredFields::create([
             'Quantity',
@@ -239,11 +247,11 @@ class OfferPageController extends \PageController
                 $article->OfferID = $offer->ID;
                 $article->write();
 
-                $form->sessionMessage('Artikel erfolgreich hinzugefügt.', 'good');
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich hinzugefügt.');
                 return $this->redirectBack();
             }
         }
-        $form->sessionMessage('Fehler beim Hinzufügen des Artikels.', 'bad');
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Hinzufügen des Artikels.');
         return $this->redirectBack();
     }
 
@@ -258,7 +266,7 @@ class OfferPageController extends \PageController
                 );
 
                 $action = FieldList::create(
-                    FormAction::create('doEditArticle', 'Speichern')->addExtraClass('btn btn-primary px-4  mb-2')
+                    FormAction::create('doEditArticle', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
                 );
                 $required = RequiredFields::create([
                     'Quantity',
@@ -286,11 +294,12 @@ class OfferPageController extends \PageController
                 $form->saveInto($offerArticle);
                 $offerArticle->write();
 
-                $form->sessionMessage('Artikel erfolgreich gespeichert.', 'good');
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich gespeichert.');
                 return $this->redirect($this->Link('?e=' . $offerArticle->OfferID));
             }
         }
-        $form->sessionMessage('Fehler beim Speichern des Artikels.', 'bad');
+        
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Speichern des Artikels.');
         return $this->redirectBack();
     }
 
@@ -306,8 +315,10 @@ class OfferPageController extends \PageController
         $offer = $this->actOffer();
         if ($offer) {
             if ($offer->sendOfferEmail()) {
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Angebot erfolgreich gesendet.');
                 return $this->redirect($this->Link('?e=' . $offer->ID.'&sent=1'));
             } else {
+                $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Senden des Angebots.');
                 return $this->redirect($this->Link('?e=' . $offer->ID.'&sent=0'));
             }
         }

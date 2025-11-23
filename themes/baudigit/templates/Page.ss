@@ -22,9 +22,17 @@
 	<link href="/_resources/themes/baudigit/javascript/plugins/fullcalendar/css/main.min.css" rel="stylesheet">
 	<!--bootstrap css-->
 	<link href="/_resources/themes/baudigit/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/_resources/themes/baudigit/javascript/plugins/datatable/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 	<link rel="stylesheet" href="/_resources/themes/baudigit/css/extra-icons.css">
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
+	
+  	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
+
+	<link href="/_resources/themes/baudigit/javascript/plugins/Drag-And-Drop/dist/imageuploadify.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="/_resources/themes/baudigit/javascript/plugins/notifications/css/lobibox.min.css">
+
 	<!--main css-->
 	<link href="/_resources/themes/baudigit/css/bootstrap-extended.css" rel="stylesheet">
 	<link href="/_resources/themes/baudigit/css/main.css" rel="stylesheet">
@@ -35,6 +43,10 @@
 	<link href="/_resources/themes/baudigit/css/responsive.css" rel="stylesheet">
 </head>
 <body class="$ClassName.ShortName<% if not $Menu(2) %> no-sidebar<% end_if %>" <% if $i18nScriptDirection %>dir="$i18nScriptDirection"<% end_if %>>
+
+
+<% include NotifyData %>
+
 <% include Header %>
 <% include SideBar %>
 <div class="main-wrapper" role="main">
@@ -47,24 +59,38 @@
 <!--end overlay-->
 <% include Footer %>
 
-
 <!--bootstrap js-->
-  <script src="/_resources/themes/baudigit/javascript/bootstrap.bundle.min.js"></script>
+	<script src="/_resources/themes/baudigit/javascript/bootstrap.bundle.min.js"></script>
 
-  <!--plugins-->
-  <script src="/_resources/themes/baudigit/javascript/jquery.min.js"></script>
-  <!--plugins-->
-  <script src="/_resources/themes/baudigit/javascript/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
-  <script src="/_resources/themes/baudigit/javascript/plugins/metismenu/metisMenu.min.js"></script>
-  <script src="/_resources/themes/baudigit/javascript/plugins/apexchart/apexcharts.min.js" type="dont/load"></script>
-  <script src="/_resources/themes/baudigit/javascript/plugins/simplebar/js/simplebar.min.js"></script>
-  <script src="/_resources/themes/baudigit/javascript/plugins/peity/jquery.peity.min.js"></script>
-  <script>
-    $(".data-attributes span").peity("donut")
-  </script>
-  <script src="/_resources/themes/baudigit/javascript/plugins/fullcalendar/js/main.min.js"></script>
-  <script src="/_resources/themes/baudigit/javascript/plugins/fullcalendar/js/de.global.js"></script>
-  <script src="/_resources/themes/baudigit/javascript/dashboard2.js" type="dont/load"></script>
-  <script src="/_resources/themes/baudigit/javascript/main.js"></script>
+	<!--plugins-->
+	<script src="/_resources/themes/baudigit/javascript/jquery.min.js"></script>
+	<!--plugins-->
+	<script src="/_resources/themes/baudigit/javascript/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+	<script src="/_resources/themes/baudigit/javascript/plugins/metismenu/metisMenu.min.js"></script>
+	<script src="/_resources/themes/baudigit/javascript/plugins/apexchart/apexcharts.min.js" type="dont/load"></script>
+	<script src="/_resources/themes/baudigit/javascript/plugins/simplebar/js/simplebar.min.js"></script>
+	<script src="/_resources/themes/baudigit/javascript/plugins/peity/jquery.peity.min.js"></script>
+	<script>
+	$(".data-attributes span").peity("donut")
+	</script>
+	<script src="/_resources/themes/baudigit/javascript/plugins/fullcalendar/js/main.min.js"></script>
+	<script src="/_resources/themes/baudigit/javascript/plugins/fullcalendar/js/de.global.js"></script>
+	<script src="/_resources/themes/baudigit/javascript/dashboard2.js" type="dont/load"></script>
+
+	<script src="/_resources/themes/baudigit/javascript/plugins/datatable/js/jquery.dataTables.min.js"></script>
+	<script src="/_resources/themes/baudigit/javascript/plugins/datatable/js/dataTables.bootstrap5.min.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	
+	<script src="/_resources/themes/baudigit/javascript/plugins/Drag-And-Drop/dist/imageuploadify.min.js"></script>
+
+	<!-- signature -->
+	<script src="/_resources/themes/baudigit/javascript/jSignature.min.js"></script>
+
+	<!--notification js -->
+	<script src="/_resources/themes/baudigit/javascript//plugins/notifications/js/lobibox.min.js"></script>
+	<script src="/_resources/themes/baudigit/javascript//plugins/notifications/js/notifications.min.js"></script>
+
+	<script src="/_resources/themes/baudigit/javascript/main.js"></script>
 </body>
 </html>
