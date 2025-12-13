@@ -41,6 +41,7 @@
 	<link href="/_resources/themes/baudigit/css/semi-dark.css" rel="stylesheet">
 	<link href="/_resources/themes/baudigit/css/bordered-theme.css" rel="stylesheet">
 	<link href="/_resources/themes/baudigit/css/responsive.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@6.1/dist/fancybox/fancybox.css" />
 </head>
 <body class="$ClassName.ShortName<% if not $Menu(2) %> no-sidebar<% end_if %>" <% if $i18nScriptDirection %>dir="$i18nScriptDirection"<% end_if %>>
 
@@ -91,6 +92,13 @@
 	<script src="/_resources/themes/baudigit/javascript//plugins/notifications/js/lobibox.min.js"></script>
 	<script src="/_resources/themes/baudigit/javascript//plugins/notifications/js/notifications.min.js"></script>
 
+	<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@6.1/dist/fancybox/fancybox.umd.js"></script>
+	<script>
+	    Fancybox.bind("[data-fancybox]", {
+	        // Options will go here
+	    });
+	</script>
 	<script src="/_resources/themes/baudigit/javascript/main.js"></script>
+	
 </body>
 </html>

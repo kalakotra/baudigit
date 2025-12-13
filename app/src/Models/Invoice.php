@@ -86,6 +86,15 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
 
     }
 
+    public function getGermanStatusOptions(): array
+    {
+        return [
+            0 => 'Entwurf',
+            1 => 'Gesendet',
+            2 => 'Bezahlt',
+        ];
+    }
+
     public function getTotalNetto(): float|int
     {
         $total = 0;

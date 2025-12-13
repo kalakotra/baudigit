@@ -13,7 +13,7 @@
         <div class="card-body">
             <div class="form-body">
                 <% if checkLocationList %>
-                    <table id="datatable" class="table table-striped table-bordered" style="width:100%">
+                    <table id="locationListTable" class="dataTableMe table table-striped table-bordered" style="width:100%">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -74,7 +74,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="datatable" class="table table-striped table-bordered" style="width:100%">
+                    <table id="locationListTable" class="dataTableMe table table-striped table-bordered" style="width:100%">
                         <thead>
                             <tr>
                                 <th>Firma</th>

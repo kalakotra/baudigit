@@ -68,4 +68,23 @@ class ProjectTaskHours extends DataObject implements PermissionProvider, i18nEnt
             $projectTask->write();
         }
     }
+
+    public function getAllImagesInBase64()
+    {
+        $imagesBase64 = [];
+        $myHtml = 'test';
+        foreach ($this->TaskImages() as $image) {
+            $filePath = $image->getFilename();
+            $myHtml .= 'Pfad: ' . $filePath . '<br/>';
+            //if (file_exists($filePath)) {
+                $imageData = file_get_contents($filePath);
+                $base64 = 'data:' . $image->getMimeType() . ';base64,' . base64_encode($imageData);
+                $imagesBase64[] = $base64;
+                $myHtml .= '<img src="' . $base64 . '" alt="Task Image" style="max-width: 200px; max-height: 200px; margin-right: 10px; margin-bottom: 10px;" />';
+            //}
+        }
+        return $myHtml;
+    }
+
+
 }

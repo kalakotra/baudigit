@@ -90,11 +90,11 @@ class InvoicePageController extends \PageController
         // due date next 14 days
         $dueDate = date('Y-m-d', strtotime('+14 days'));
         $formFields = FieldList::create(
-            TextField::create('InvoiceNumber', 'Rechnungsnummer', $nextInvoiceNumber)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true),
-            DateField::create('DueDate', 'Fälligkeitsdatum', $dueDate)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            GroupedDropdownField::create('ClientObjectID', 'Kunde', $clientGroupedList)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select')->setEmptyString('-- bitte wählen --'),
-            TextareaField::create('IntroText', 'Einleitungstext', $config->InvoiceIntroText)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            TextareaField::create('OutroText', 'Schlusstext', $config->InvoiceOutroText)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
+            TextField::create('InvoiceNumber', 'Rechnungsnummer', $nextInvoiceNumber)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control')->setReadonly(true),
+            DateField::create('DueDate', 'Fälligkeitsdatum', $dueDate)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
+            GroupedDropdownField::create('ClientObjectID', 'Kunde', $clientGroupedList)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select select2me')->setEmptyString('-- bitte wählen --'),
+            TextareaField::create('IntroText', 'Einleitungstext', $config->InvoiceIntroText)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
+            TextareaField::create('OutroText', 'Schlusstext', $config->InvoiceOutroText)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
         );
 
         $action = FieldList::create(
@@ -162,6 +162,10 @@ class InvoicePageController extends \PageController
             // add hidden field with id
             $addForm->Fields()->push(
                 HiddenField::create('e', 'ID')->setValue($invoice->ID)
+            );
+
+            $addForm->Fields()->push(
+                DropdownField::create('Status', 'Status', Invoice::singleton()->getGermanStatusOptions())->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')
             );
 
             $action = FieldList::create(

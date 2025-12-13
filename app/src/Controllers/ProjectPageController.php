@@ -173,7 +173,7 @@ class ProjectPageController extends \PageController
             );
 
             if ($project->Status == 2 || $project->Status == 3 || $project->Status == 4) {
-                $submitAction->setDisabled(true);
+                //$submitAction->setDisabled(true); // to be cleared
             }
 
             $required = RequiredFields::create([
@@ -191,16 +191,16 @@ class ProjectPageController extends \PageController
 
     public function doEdit($data, $form) {
         $project = $this->actProject();
-        if ($project && !in_array($project->Status, [2, 3, 4])) {
+        //if ($project && !in_array($project->Status, [0, 1, 2, 3, 4])) {
             $form->saveInto($project);
             $project->write();
 
             $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Projekt erfolgreich gespeichert.');
             return $this->redirectBack();
-        }
+        //}
 
-        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Speichern des Projekts.');
-        return $this->redirectBack();
+        //$this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Speichern des Projekts.');
+        //return $this->redirectBack();
     }
 
     public function getAllProjectMembers() {

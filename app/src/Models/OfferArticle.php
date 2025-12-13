@@ -37,10 +37,10 @@ class OfferArticle extends Article
 
         // change offer status to Draft if not already
         $offer = $this->Offer();
-        if ($offer && $offer->Status != 0) { // 0 = Draft
+       /* if ($offer && $offer->Status != 0) { // 0 = Draft
             $offer->Status = 0; // set to Draft
             $offer->write();
-        }
+        }*/
     }
 
     public function getDiscountedPrice(): float|int {

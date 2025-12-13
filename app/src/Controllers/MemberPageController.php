@@ -25,11 +25,16 @@ class MemberPageController extends \PageController
     ];
 
     public function readAllInputs() {
+        
+        // only groups 1 and 3 (admin and worker)
+        $members = Member::get()->filter('Groups.ID', [1, 3]);
+
         $currentUser = Security::getCurrentUser();
         if ($currentUser) {
-            return Member::get()->exclude('ID', $currentUser->ID);
+            $members = $members->exclude('ID', $currentUser->ID);
         }
-        return Member::get();
+
+        return $members;
     }
 
     public function actMember() {
@@ -46,7 +51,7 @@ class MemberPageController extends \PageController
 
     public function getGroupOptions() {
         return [
-            2 => 'Administrator',
+            1 => 'Administrator',
             3 => 'Arbeiter'
         ];
     }
@@ -124,7 +129,7 @@ class MemberPageController extends \PageController
 
             // Get current group ID
             $currentGroupID = null;
-            $memberGroups = $member->Groups()->filter('ID', [2, 3]);
+            $memberGroups = $member->Groups()->filter('ID', [1, 3]);
             if ($memberGroups->count() > 0) {
                 $currentGroupID = $memberGroups->first()->ID;
             }

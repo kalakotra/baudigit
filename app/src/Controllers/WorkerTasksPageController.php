@@ -135,6 +135,39 @@ class WorkerTasksPageController extends \PageController
                 if ($fileData['tmp_name'] == '') {
                     continue;
                 }
+
+                // resize tmp image if biger than 2000px width or height
+                list($width, $height) = getimagesize($fileData['tmp_name']);
+                if ($width > 2000 || $height > 2000) {
+                    $ratio = $width / $height;
+                    if ($ratio > 1) {
+                        $new_width = 1500;
+                        $new_height = 1500 / $ratio;
+                    } else {
+                        $new_height = 1500;
+                        $new_width = 1500 * $ratio;
+                    }
+                    $src = null;
+                    if ($fileData['type'] == 'image/jpeg' || $fileData['type'] == 'image/jpg') {
+                        $src = imagecreatefromjpeg($fileData['tmp_name']);
+                    } elseif ($fileData['type'] == 'image/png') {
+                        $src = imagecreatefrompng($fileData['tmp_name']);
+                    }
+                    if ($src) {
+                        $dst = imagecreatetruecolor($new_width, $new_height);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+                        // save resized image back to tmp file
+                        if ($fileData['type'] == 'image/jpeg' || $fileData['type'] == 'image/jpg') {
+                            imagejpeg($dst, $fileData['tmp_name'], 90);
+                        } elseif ($fileData['type'] == 'image/png') {
+                            imagepng($dst, $fileData['tmp_name'], 9);
+                        }
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+                }
+
+                
                 // Handle each uploaded file
                 $file = new Image();
                 $file->setFromLocalFile($fileData['tmp_name'], $taskFolder . '/' . $fileData['name']);

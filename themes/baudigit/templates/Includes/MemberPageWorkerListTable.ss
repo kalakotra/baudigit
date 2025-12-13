@@ -17,7 +17,7 @@
                     <td>$FirstName $Surname</td>
                     <td>$Email</td>
                     <td align="center">
-                        <% if Groups.filter('ID', 2).count > 0 %>
+                        <% if Groups.filter('ID', 1).count > 0 %>
                             <span class="badge bg-danger">Administrator</span>
                         <% else_if Groups.filter('ID', 3).count > 0 %>
                             <span class="badge bg-primary">Arbeiter</span>
@@ -25,7 +25,7 @@
                             <span class="badge bg-secondary">Keine Gruppe</span>
                         <% end_if %>
                     </td>
-                    <td>$Created.Format('dd.MM.yyyy')</td>
+                    <td data-order="$Created.Format('yyyyMMdd')">$Created.Format('dd.MM.yyyy')</td>
                     <td align="center">
                         <% if Active %>
                             <span class="badge bg-success">Ja</span>

@@ -6,7 +6,8 @@ use Mpdf\Mpdf;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\TempFolder;
 use SilverStripe\Control\Director;
-use SilverStripe\Security\Security;
+use SilverStripe\Security\Member;
+    use SilverStripe\Security\Security;
 use SilverStripe\SiteConfig\SiteConfig;
 
     use SilverStripe\CMS\Controllers\ContentController;
@@ -51,6 +52,11 @@ use SilverStripe\SiteConfig\SiteConfig;
         //return current user
         public function currentUser() {
             return Security::getCurrentUser();
+        }
+
+
+        public function getUserByID($id) {
+            return Member::get()->byID($id);
         }
 
 
@@ -138,6 +144,9 @@ use SilverStripe\SiteConfig\SiteConfig;
                 'margin_bottom' => 26,
             ]);
 
+            //$mpdf->curlAllowUnsafeSslRequests = true;
+            //$mpdf->showImageErrors = true;
+            //$mpdf->debug = true;
             //$mpdf->setAutoTopMargin();
 
             //$mpdf->setAutoTopMargin = 'stretch';

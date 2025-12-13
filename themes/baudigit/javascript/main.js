@@ -17,6 +17,7 @@ $(function () {
   /* toggle button */
 
   $(".btn-toggle").click(function () {
+    console.log("toggle clicked");
     $("body").hasClass("toggled") ? ($("body").removeClass("toggled"), $(".sidebar-wrapper").unbind("hover")) : ($("body").addClass("toggled"), $(".sidebar-wrapper").hover(function () {
       $("body").addClass("sidebar-hovered")
     }, function () {
@@ -303,7 +304,7 @@ $(function () {
 
   // datatables
   if ($('.dataTableMe').length) {
-    $('.dataTableMe').DataTable({
+    var dataTable = $('.dataTableMe').DataTable({
       "language": {
         "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/de-DE.json"
       },
@@ -312,6 +313,11 @@ $(function () {
       //buttons: [ 'excel', 'pdf', 'print']
     });
     //table.buttons().container().appendTo( '#offerListTable_paginate' );
+
+    // if #projectListTable order by first column desc
+    if ($('#projectListTable, #offerListTable').length) {
+      dataTable.order([0, 'desc']).draw();
+    }
   }
 
   // end datatables

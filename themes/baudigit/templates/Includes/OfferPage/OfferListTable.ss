@@ -13,7 +13,7 @@
         <tbody>
             <% loop readAllInputs %>
                 <tr>
-                    <td>
+                    <td data-order="$Created.Format('yyyyMMdd')">
                         $Created.Format('dd.MM.yyyy')
                     </td>
                     <td>$OfferNumber</td>

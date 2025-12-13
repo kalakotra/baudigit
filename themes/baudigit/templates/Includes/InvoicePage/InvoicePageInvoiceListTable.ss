@@ -1,5 +1,5 @@
 <div >
-    <table id="example" class="dataTableMe table table-striped table-bordered" style="width:100%">
+    <table id="invoicePageInvoiceListTable" class="dataTableMe table table-striped table-bordered" style="width:100%">
         <thead>
             <tr>
                 <th>Rechnungsnummer</th>
@@ -16,8 +16,8 @@
                 <tr>
                     <td>$InvoiceNumber</td>
                     <td>$ClientObject.getFullName</td>
-                    <td>$Created.Format('dd.MM.yyyy')</td>
-                    <td>$DueDate.Format('dd.MM.yyyy')</td>
+                    <td data-order="$Created.Format('yyyyMMdd')">$Created.Format('dd.MM.yyyy')</td>
+                    <td data-order="$DueDate.Format('yyyyMMdd')">$DueDate.Format('dd.MM.yyyy')</td>
                     <td class="text-end">$getTotalBrutto</td>
                     <td>$getGermanStatus</td>
                     <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt"></i></a></td>

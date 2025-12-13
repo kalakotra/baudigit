@@ -43,6 +43,17 @@
                         </div>
                     </a>
                 </li>
+                <% if $actInvoice.Project %>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#invoice_project" role="tab" aria-selected="false">
+                            <div class="d-flex align-items-center">
+                                <div class="tab-icon"><i class="bi bi-list-task me-1 fs-6"></i>
+                                </div>
+                                <div class="tab-title">Projekt Daten</div>
+                            </div>
+                        </a>
+                    </li>
+                <% end_if %>
             </ul>
             <div class="tab-content py-3">
                 <div class="tab-pane fade show active" id="invoice_home" role="tabpanel">
@@ -54,6 +65,12 @@
                     <hr />
                     <% include Includes/InvoicePage/InvoicePageArticleTable %>
                 </div>
+
+                <% if $actInvoice.Project %>
+                    <div class="tab-pane fade" id="invoice_project" role="tabpanel">
+                        <% include Includes/InvoicePage/InvoicePageProjectData Project=$actInvoice.Project %>
+                    </div>
+                <% end_if %>
             </div>
         </div>
     </div>

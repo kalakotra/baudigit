@@ -2,17 +2,18 @@
     <table id="projectListTable" class="dataTableMe table table-striped table-bordered" style="width:100%">
         <thead>
             <tr>
+                <th>Datum</th>
                 <th>Titel</th>
                 <th>Kunde</th>
                 <th>Kundenobjekt</th>
                 <th>Status</th>
-                <th>Erstellt am</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             <% loop readAllInputs %>
                 <tr>
+                    <td data-order="$Created.Format('yyyyMMdd')">$Created.Format('dd.MM.yyyy')</td>
                     <td>$Title</td>
                     <td>$ClientObject.Client.Company</td>
                     <td>$ClientObject.getFullName</td>
@@ -31,7 +32,7 @@
                             <span class="badge bg-warning">$getStatusLabel</span>
                         <% end_if %>
                     </td>
-                    <td>$Created.Format('dd.MM.yyyy')</td>
+                    
                     <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt"></i></a></td>
                 </tr>
             <% end_loop %>

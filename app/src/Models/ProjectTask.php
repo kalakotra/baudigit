@@ -3,6 +3,7 @@
 namespace app\Models;
 
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\GroupedList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Forms\DropdownField;
@@ -112,6 +113,31 @@ class ProjectTask extends DataObject implements PermissionProvider, i18nEntityPr
         }
 
         return true;
+    }
+
+    public function getSumHours(): float|int {
+        $total = 0;
+        foreach ($this->TaskHours() as $hour) {
+            $total += $hour->Hours;
+        }
+        return $total;
+    }
+
+    public function getHoursStatus() {
+        if ($this->EstimatedHours > 0) {
+            $sumHours = $this->getSumHours();
+            if ($sumHours < $this->EstimatedHours) {
+                return 'badge bg-success';
+            } elseif ($sumHours == $this->EstimatedHours) {
+                return 'badge bg-success';
+            } else {
+                return 'badge bg-danger';
+            }
+        }
+    }
+
+    public function getProjectTasksGroupedByMember() {
+        return GroupedList::create($this->TaskHours()->sort('LoggedByID, Created'));
     }
 
 }

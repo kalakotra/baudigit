@@ -125,6 +125,74 @@
                 </div>
             </div>
         <% end_if %>
+
+        <% if Project %>
+            <pagebreak />
+            <% with Project %>
+                <div class="row pb-4">
+                    <div class="col-12">
+                        <h2>Projekt Informationen:</h2>
+                        <h3 class="pt-2">$Title</h3>
+                        <% if $StartDate %>
+                            <div >
+                                Startdatum: $StartDate.Format('dd.MM.yyyy')
+                            </div>
+                        <% end_if %>
+                        <% if $EndDate %>
+                            <div >
+                                Enddatum: $EndDate.Format('dd.MM.yyyy')
+                            </div>
+                        <% end_if %>
+                        <p class="pt-3">$Description</p>
+                    </div>
+                </div>
+                <% if ProjectTasks %>
+                    <div class="row">
+                        <div class="col-12">
+                            <h3>Aufgaben:</h3>
+                        </div>
+                        <% loop ProjectTasks %>
+                            <div class="col-12 pt-2">
+                                <b>$Title</b>
+                                <% if Description %>
+                                    <p><small>$Description</small></p>
+                                <% end_if %>
+                            </div>
+                            <% if TaskHours %>
+                                
+                                <div class="col-12">
+                                    <table colspan="2" rowspan="2" style="width:100%">
+                                        <tr>
+                                            <td>Stunden</td>
+                                            <td>Datum</td>
+                                            <td>Beschreibung</td>
+                                            <td>Unterschrift</td>
+                                        </tr>
+                                        <% loop TaskHours %>
+                                            
+                                            <tr>
+                                                <td>$Hours</td>
+                                                <td>$Created.Format('dd.MM.yyyy H:mm')</td>
+                                                <td>
+                                                    <% if Description %>
+                                                        <p class="px-2"><small>$Description</small></p>
+                                                    <% end_if %>
+                                                </td>
+                                                <td>
+                                                    <% if $Signature %>
+                                                        <img src="$Signature" alt="Unterschrift" style="max-width: 100px; max-height: 50px;" />
+                                                    <% end_if %>
+                                                </td>
+                                            </tr>
+                                        <% end_loop %>
+                                    </table>
+                                </div>
+                            <% end_if %>
+                        <% end_loop %>
+                    </div>
+                <% end_if %>
+            <% end_with %>
+        <% end_if %>
     <% end_with %>
 </body>
 </html>

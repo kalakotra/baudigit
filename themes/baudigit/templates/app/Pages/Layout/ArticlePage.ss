@@ -28,7 +28,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example" class="table table-striped table-bordered" style="width:100%">
+                <table id="productListTable" class="dataTableMe table table-striped table-bordered" style="width:100%">
                     <thead>$Controller.readAllInputs.Count
                         <tr>
                             <th>Interne ID </th>
