@@ -79,6 +79,13 @@ class WorkerTasksPageController extends \PageController
             $taskFolder = $task->Project()->getUploadFolders()['task']. '/' . $taskID . '/images/' . $this->currentUser()->ID;
             $TaskImagesField->setAllowedExtensions(['jpg', 'jpeg', 'png'])->setFolderName($taskFolder)->setAttribute('multiple', true);
 
+            $fields->fieldByName('Signature')->setDescription('Bitte unterschreiben Sie hier, um die geleisteten Stunden zu bestätigen.');
+            $requiredFields = RequiredFields::create([
+                'Hours',
+                'Signature',
+            ]);
+            
+            /*
             if ($task->NeedsConfirmation) {
                 $fields->fieldByName('Signature')->setDescription('Bitte unterschreiben Sie hier, um die geleisteten Stunden zu bestätigen.');
                 $requiredFields = RequiredFields::create([
@@ -93,6 +100,7 @@ class WorkerTasksPageController extends \PageController
                 ]);
 
             }
+            */
             
             $actionFields = FieldList::create(
                 FormAction::create('doWorkerTasksTimeForm', 'Stunden erfassen')->addExtraClass('btn btn-success px-4 mb-2 w-100'),

@@ -127,7 +127,11 @@ class OfferPageController extends \PageController
         if ($offer) {
             $addForm = $this->add();
 
-            // add hidden field with id
+            // add hidden field with id and status dropdown
+            $addForm->Fields()->push(
+                DropdownField::create('Status', 'Status', Offer::singleton()->getGermanStatusOptions())->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')
+            );
+
             $addForm->Fields()->push(
                 HiddenField::create('e', 'ID')->setValue($offer->ID)
             );
@@ -189,7 +193,7 @@ class OfferPageController extends \PageController
                 if ($offerArticle && $offerArticle->OfferID == $offer->ID) {
                     $offerArticle->delete();
                     $offerArticle->destroy();
-                    return $this->redirect($this->Link('?e=' . $offer->ID));
+                    return $this->redirect($this->Link('?e=' . $offer->ID . '&activetab=offer_article'));
                 }
             }
         }
@@ -248,7 +252,8 @@ class OfferPageController extends \PageController
                 $article->write();
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich hinzugefügt.');
-                return $this->redirectBack();
+                //return $this->redirectBack();
+                return $this->redirect($this->Link('?e=' . $offer->ID . '&activetab=offer_article'));
             }
         }
         $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Hinzufügen des Artikels.');
@@ -295,7 +300,7 @@ class OfferPageController extends \PageController
                 $offerArticle->write();
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich gespeichert.');
-                return $this->redirect($this->Link('?e=' . $offerArticle->OfferID));
+                return $this->redirect($this->Link('?e=' . $offerArticle->OfferID. '&activetab=offer_article'));
             }
         }
         

@@ -8,9 +8,6 @@
         <% loop getAssignedTasks %>
             <tr <% if NeedsConfirmation %>class="table-warning-"<% end_if %>>
                 <td>
-                    <div class="text-end mb-1">
-                        <% if NeedsConfirmation %><span class="badge bg-danger">Bestätigung benötigt</span><% end_if %>
-                    </div>
                     $Title
                     <br />
                     <small>$Description</small>

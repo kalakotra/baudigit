@@ -43,10 +43,10 @@
                     <% end_if %>
                 </td>
                 <td class="text-center">
-                    <a href="{$Top.Link}/?e=$ProjectID&et=$ID" class="" title="Bearbeiten">
+                    <a href="{$Top.Link}/?e=$ProjectID&et=$ID&activetab=project_tasks" class="" title="Bearbeiten">
                         <i class="bx bx-edit-alt fs-4"></i>
                     </a>
-                    <a href="{$Top.Link}/deleteTask?e=$ProjectID&dt=$ID" class="yousure d-none" title="Löschen">
+                    <a href="{$Top.Link}/deleteTask?e=$ProjectID&dt=$ID&activetab=project_tasks" class="yousure d-none" title="Löschen">
                         <i class="bx bx-x-circle text-danger fs-4"></i>
                     </a>
                 </td>

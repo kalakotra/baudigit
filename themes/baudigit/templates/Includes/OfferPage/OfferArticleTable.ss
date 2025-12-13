@@ -19,7 +19,7 @@
                 <td class="text-end"> ({$Discount}%) $formatPrice($getDiscountAmount)</td>
                 <td class="text-end"> ({$TaxRate}%) $formatPrice($getTaxAmount)</td>
                 <td class="text-end">$formatPrice($FinalPrice)</td>
-                <td class="text-center"><a href="{$Top.Link}/?e=$OfferID&ea=$ID" class=""><i class="bx bx-edit-alt fs-4"></i></a><a href="{$Top.Link}/deleteArticle?e=$OfferID&da=$ID" class="yousure"><i class="bx bx-x-circle text-danger fs-4"></i></a></td>
+                <td class="text-center"><a href="{$Top.Link}/?e=$OfferID&ea=$ID&activetab=offer_article" class=""><i class="bx bx-edit-alt fs-4"></i></a><a href="{$Top.Link}/deleteArticle?e=$OfferID&da=$ID" class="yousure"><i class="bx bx-x-circle text-danger fs-4"></i></a></td>
             </tr>
         <% end_loop %>
     </tbody>

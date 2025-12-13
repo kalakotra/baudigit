@@ -3,11 +3,12 @@
 namespace {
 
 use Mpdf\Mpdf;
+use app\Pages\ProjectPage;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\TempFolder;
-use SilverStripe\Control\Director;
 use SilverStripe\Security\Member;
     use SilverStripe\Security\Security;
+use SilverStripe\Control\Director;
 use SilverStripe\SiteConfig\SiteConfig;
 
     use SilverStripe\CMS\Controllers\ContentController;
@@ -48,6 +49,23 @@ use SilverStripe\SiteConfig\SiteConfig;
             // You can include any CSS or JS required by your project here.
             // See: https://docs.silverstripe.org/en/developer_guides/templates/requirements/
         }
+
+        // system checks
+        
+        // check if there is Project module (ProjectPage) in CMS
+        public function hasProjectModule() {
+            return ProjectPage::get()->count() > 0;
+        }
+
+        public function checkActiveTab() {
+        if ($this->getRequest()->getVar('activetab')) {
+            return $this->getRequest()->getVar('activetab');
+        }
+        return null;
+    }
+
+
+        // end system checks
 
         //return current user
         public function currentUser() {

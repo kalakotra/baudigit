@@ -1,7 +1,8 @@
-<table id="workerProjectTasksHoursTable" class="table table-striped table-bordered" style="width:100%">
+<table id="workerProjectTasksHoursTable" class="dataTableMe table table-striped table-bordered" style="width:100%">
     <thead>
         <tr>
-            <th>Stunden / Beschreibung / Aufgabe</th>
+            <th>Stunden</th>
+            <th>Aufgabe</th>
         </tr>
     </thead>
     <tbody>
@@ -9,12 +10,14 @@
             <tr <% if NeedsConfirmation %>class="table-warning-"<% end_if %>>
                 <td>
                     <strong>Stunden: $Hours</strong>
+                </td>
+                <td>
                     <% if Description %>
-                        <br />
                         <small>$Description</small>
+                        
+                        <br />
+                        <hr />
                     <% end_if %>
-                    <br />
-                    <hr />
                     $ProjectTask.Title
                     <br />
                     <small>
@@ -26,7 +29,7 @@
     </tbody>
     <tfoot>
         <tr>
-            <th><strong>Gesamtstunden: $getActuallMonthWorkerTasksHoursSum</strong></th>
+            <td colspan="2" align="right"><strong>Gesamtstunden: $getActuallMonthWorkerTasksHoursSum</strong></td>
         </tr>
     </tfoot>
 </table>

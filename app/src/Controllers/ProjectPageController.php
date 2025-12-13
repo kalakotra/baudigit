@@ -715,7 +715,7 @@ class ProjectPageController extends \PageController
             $projectTask->write();
 
             $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Aufgabe erfolgreich hinzugefügt.');
-            return $this->redirect($this->Link('?e=' . $project->ID . '&dt=' . $projectTask->ID));
+            return $this->redirect($this->Link('?e=' . $project->ID . '&dt=' . $projectTask->ID . '&activetab=project_tasks'));
         }
         
         $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Hinzufügen der Aufgabe.');
@@ -738,7 +738,7 @@ class ProjectPageController extends \PageController
 
                 $action = FieldList::create(
                     // add cancel button/link
-                    LiteralField::create('cancel', '<a href="'.$this->Link("?e=" . $projectTask->ProjectID).'" class="btn btn-secondary px-4 mb-2 me-2">Abbrechen</a>'),
+                    LiteralField::create('cancel', '<a href="'.$this->Link("?e=" . $projectTask->ProjectID . "&activetab=project_tasks").'" class="btn btn-secondary px-4 mb-2 me-2">Abbrechen</a>'),
                     FormAction::create('doEditTask', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
                 );
                 
@@ -775,7 +775,7 @@ class ProjectPageController extends \PageController
                 }*/
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Aufgabe erfolgreich gespeichert.');
-                return $this->redirectBack();
+                return $this->redirect($this->Link('?e=' . $projectTask->ProjectID . '&dt=' . $projectTask->ID . '&activetab=project_tasks'));
             }
         }
         

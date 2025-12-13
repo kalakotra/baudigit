@@ -150,6 +150,17 @@ class Offer extends DataObject implements PermissionProvider, i18nEntityProvider
         };
     }
 
+    public function getGermanStatusOptions(): array
+    {
+        return [
+            0 => 'Entwurf',
+            1 => 'Gesendet',
+            2 => 'Akzeptiert',
+            3 => 'Projekt',
+            4 => 'Abgelehnt',
+        ];
+    }
+
     public function getPDF() {
         $controller = Controller::curr();
         $html = $controller->customise(['Offer' => $this])->renderWith('app/Pages/Layout/PDF/Offer');

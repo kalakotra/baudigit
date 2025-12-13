@@ -19,7 +19,7 @@
             <div class="card-body">
                 <ul class="nav nav-tabs nav-primary" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link active" data-bs-toggle="tab" href="#project_home" role="tab" aria-selected="true">
+                        <a class="nav-link <% if not $checkActiveTab %>active<% end_if %>" data-bs-toggle="tab" href="#project_home" role="tab" aria-selected="<% if $checkActiveTab %>false<% else %>true<% end_if %>">
                             <div class="d-flex align-items-center">
                                 <div class="tab-icon">
                                     <i class="bi bi-house-door me-1 fs-6"></i>
@@ -29,7 +29,7 @@
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" href="#project_tasks" role="tab" aria-selected="false">
+                        <a class="nav-link <% if $checkActiveTab='project_tasks' %>active<% end_if %>" data-bs-toggle="tab" href="#project_tasks" role="tab" aria-selected="<% if $checkActiveTab='project_tasks' %>true<% else %>false<% end_if %>">
                             <div class="d-flex align-items-center">
                                 <div class="tab-icon"><i class="bi bi-list-task me-1 fs-6"></i>
                                 </div>
@@ -38,7 +38,7 @@
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" href="#project_documents" role="tab" aria-selected="false">
+                        <a class="nav-link <% if $checkActiveTab='project_documents' %>active<% end_if %>" data-bs-toggle="tab" href="#project_documents" role="tab" aria-selected="<% if $checkActiveTab='project_documents' %>true<% else %>false<% end_if %>">
                             <div class="d-flex align-items-center">
                                 <div class="tab-icon"><i class='bi bi-file-earmark-text me-1 fs-6'></i>
                                 </div>
@@ -48,11 +48,11 @@
                     </li>
                 </ul>
                 <div class="tab-content py-3">
-                    <div class="tab-pane fade show active" id="project_home" role="tabpanel">
+                    <div class="tab-pane fade <% if not $checkActiveTab %>show active<% end_if %>" id="project_home" role="tabpanel">
                         <%-- Project edit form --%>
                         $edit
                     </div>
-                    <div class="tab-pane fade" id="project_tasks" role="tabpanel">
+                    <div class="tab-pane fade <% if $checkActiveTab='project_tasks' %>show active<% end_if %>" id="project_tasks" role="tabpanel">
                         <div class="row">
                             <div class="col-12 col-lg-8 mb-2">
                                 <% include ProjectTasksTableList %>                        
@@ -62,7 +62,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="tab-pane fade" id="project_documents" role="tabpanel">
+                    <div class="tab-pane fade <% if $checkActiveTab='project_documents' %>show active<% end_if %>" id="project_documents" role="tabpanel">
                         <div class="px-3">
                             <div class="row">
                                 <div class="col-12 col-lg-8 mb-2">
