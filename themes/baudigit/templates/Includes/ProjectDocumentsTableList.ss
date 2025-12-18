@@ -15,7 +15,7 @@
             <div class="row">
                 <% loop $Top.actProject.Documents.filter('Category', $ID) %>
                     <div class="col-6 col-md-4 col-lg-3 document-item mb-2">
-                        <a href="$Link" target="_blank">
+                        <a href="$Link" target="_blank" data-fancybox>
                             <i class="bi bi-file-text bi-filetype-$Extension me-1 fs-1"></i>
                             <br />
                             $Title

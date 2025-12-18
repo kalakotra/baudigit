@@ -37,10 +37,6 @@
                     <% else %>
                         <span class="badge bg-primary">$getStatusLabel</span>
                     <% end_if %>
-                    <% if NeedsConfirmation %>
-                        <br />
-                        <span class="badge bg-danger">Benötigt Bestätigung</span>
-                    <% end_if %>
                 </td>
                 <td class="text-center">
                     <a href="{$Top.Link}/?e=$ProjectID&et=$ID&activetab=project_tasks" class="" title="Bearbeiten">

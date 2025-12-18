@@ -8,6 +8,7 @@ use app\Models\ProjectTask;
 use app\Models\ProjectMember;
 use SilverStripe\Assets\File;
 use app\Models\ProjectDocument;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Forms\DropdownField;
@@ -108,6 +109,32 @@ class Project extends DataObject implements PermissionProvider, i18nEntityProvid
             default:
                 return 'Unbekannt';
         }
+    }
+
+    public function getGermanStatusOptions(): array
+    {
+        return [
+            0 => 'Neu',
+            1 => 'Laufend',
+            2 => 'Abgeschlossen',
+            3 => 'Abgerechnet',
+            4 => 'Storniert',
+        ];
+    }
+
+    public function getGermanStatusOptionsDataList()
+    {
+
+        $myList = ArrayList::create();
+        foreach ($this->getGermanStatusOptions() as $key => $value) {
+            $myItem = [
+                'isActive' => ($this->Status == $key) ? 'active' : '',
+                'Key' => $key,
+                'Title' => $value,
+            ];
+            $myList->push($myItem);
+        }
+        return $myList;
     }
 
     public function getCMSFields()

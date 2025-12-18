@@ -9,6 +9,7 @@ use app\Models\Invoice;
 use app\Pages\InvoicePage;
 use app\Models\ClientObject;
 use app\Models\OfferArticle;
+use app\Pages\ProjectPage;
 use SilverStripe\Forms\Form;
 use app\Models\InvoiceArticle;
 use SilverStripe\ORM\DataList;
@@ -35,8 +36,18 @@ class OfferPageController extends \PageController
         'deleteArticle',
         'previewPDF',
         'send',
-        'toInvoice'
+        'toInvoice',
+        'changeOfferStatus'
     ];
+
+    // check if there is a project part in system
+    public function checkProjectModule() {
+        $projectPage = ProjectPage::get();
+        if ($projectPage->exists()) {
+            return true;
+        }
+        return false;
+    }
 
     public function readAllInputs() {
         // if ShowOnlyStatus filter is set, filter offers by status
@@ -73,6 +84,25 @@ class OfferPageController extends \PageController
         return false;
     }
 
+    public function changeOfferStatus() {
+        $id = $this->checkEdit();
+        $newStatus = $this->getRequest()->getVar('status');
+
+        if ($id && is_numeric($id) && is_numeric($newStatus)) {
+            $offer = Offer::get()->byID($id);
+            if ($offer) { 
+                $offer->Status = intval($newStatus);
+                $offer->write();
+
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Angebotsstatus erfolgreich geändert.');
+                return $this->redirectBack();
+            }
+        }
+
+        $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Fehler beim Ändern des Angebotsstatus.');
+        return $this->redirectBack();
+    }
+
     public function add() {
         // get last offer to suggest next offer number, format YYYY-0001
         $lastOffer = Offer::get()->sort('Created', 'DESC')->first();
@@ -99,7 +129,7 @@ class OfferPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
+            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4  mb-2')
         );
 
         $required = RequiredFields::create([
@@ -127,17 +157,12 @@ class OfferPageController extends \PageController
         if ($offer) {
             $addForm = $this->add();
 
-            // add hidden field with id and status dropdown
-            $addForm->Fields()->push(
-                DropdownField::create('Status', 'Status', Offer::singleton()->getGermanStatusOptions())->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')
-            );
-
             $addForm->Fields()->push(
                 HiddenField::create('e', 'ID')->setValue($offer->ID)
             );
 
             $action = FieldList::create(
-                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
             );
 
             $required = RequiredFields::create([
@@ -225,7 +250,7 @@ class OfferPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAddArticle', 'Hinzufügen')->addExtraClass('btn btn-success px-4 mb-2')
+            FormAction::create('doAddArticle', 'Hinzufügen')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
         );
         $required = RequiredFields::create([
             'Quantity',
@@ -271,7 +296,7 @@ class OfferPageController extends \PageController
                 );
 
                 $action = FieldList::create(
-                    FormAction::create('doEditArticle', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
+                    FormAction::create('doEditArticle', 'Speichern')->addExtraClass('btn btn-sm btn-sm btn-success px-4  mb-2')
                 );
                 $required = RequiredFields::create([
                     'Quantity',

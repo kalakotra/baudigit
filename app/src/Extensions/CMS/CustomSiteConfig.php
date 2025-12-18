@@ -44,8 +44,8 @@ class CustomSiteConfig extends DataExtension
         'InvoiceIntroText' => 'Text', // Standard Einleitungstext für Rechnungen
         'InvoiceOutroText' => 'Text', // Standard Schlusstext für Rechnungen
 
-        'EmailOfferText' => 'HTMLText', // Standard Text für Angebots-E-Mail
-        'EmailInvoiceText' => 'HTMLText', // Standard Text für Rechnungs-E-Mail
+        'EmailOfferText' => 'Text', // Standard Text für Angebots-E-Mail
+        'EmailInvoiceText' => 'Text', // Standard Text für Rechnungs-E-Mail
     ];
 
     private static $has_one = [
@@ -119,7 +119,7 @@ class CustomSiteConfig extends DataExtension
             if ($details) {
                 $details .= "<br />";
             }
-            $details .= "Kontoinhaber: " . $this->owner->PaymentAccountHolder;
+            $details .= "Kontoinhaber: <br />" . $this->owner->PaymentAccountHolder;
         }
         return DBField::create_field('HTMLText', $details);
     }
@@ -230,8 +230,8 @@ class CustomSiteConfig extends DataExtension
             TextareaField::create('OfferOutroText', $this->owner->fieldLabel('OfferOutroText')),
             TextareaField::create('InvoiceIntroText', $this->owner->fieldLabel('InvoiceIntroText')),
             TextareaField::create('InvoiceOutroText', $this->owner->fieldLabel('InvoiceOutroText')),
-            HTMLEditorField::create('EmailOfferText', $this->owner->fieldLabel('EmailOfferText')),
-            HTMLEditorField::create('EmailInvoiceText', $this->owner->fieldLabel('EmailInvoiceText')),
+            TextareaField::create('EmailOfferText', $this->owner->fieldLabel('EmailOfferText')),
+            TextareaField::create('EmailInvoiceText', $this->owner->fieldLabel('EmailInvoiceText')),
         ]);
     }
 }

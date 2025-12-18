@@ -78,7 +78,7 @@ class ClientPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAdd', 'Hinzufügen')->addExtraClass('btn btn-primary px-4')
+            FormAction::create('doAdd', 'Hinzufügen')->addExtraClass('btn btn-sm btn-primary px-4')
         );
 
         $required = RequiredFields::create([
@@ -117,7 +117,7 @@ class ClientPageController extends \PageController
                 );
 
                 $action = FieldList::create(
-                    FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-primary px-4')
+                    FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-sm btn-primary px-4')
                 );
 
                 $required = RequiredFields::create([
@@ -165,7 +165,7 @@ class ClientPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAddLocation', 'Hinzufügen')->addExtraClass('btn btn-primary px-4')
+            FormAction::create('doAddLocation', 'Hinzufügen')->addExtraClass('btn btn-sm btn-primary px-4')
         );
 
         $required = RequiredFields::create([
@@ -217,7 +217,7 @@ class ClientPageController extends \PageController
                     
 
                     $action = FieldList::create(
-                        FormAction::create('doEditLocation', 'Speichern')->addExtraClass('btn btn-primary px-4')
+                        FormAction::create('doEditLocation', 'Speichern')->addExtraClass('btn btn-sm btn-primary px-4')
                     );
 
                     $required = RequiredFields::create([

@@ -4,6 +4,8 @@ namespace app\Models;
 
 use app\Models\ClientObject;
 use app\Models\InvoiceArticle;
+use app\Pages\InvoicePage;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Email\Email;
@@ -39,7 +41,7 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
         'TotalAmount' => 'Decimal(19,2)',
         'IntroText' => 'Text',
         'OutroText' => 'Text',
-        'Status' => 'Int', //'Enum("Draft,Sent,Paid", "Draft")', 0=Draft, 1=Sent, 2=Paid, 
+        'Status' => 'Int', //'Enum("Draft,Sent,Paid", "Draft")', 0=Draft, 1=Sent, 2=Paid, 3=Cancelled (Storno)
         'DueDate' => 'Date',
     ];
 
@@ -47,6 +49,8 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
         'ClientObject' => ClientObject::class,
         'Project' => Project::class,
         'Offer' => Offer::class,
+        'CancellationOf' => Invoice::class,
+        'RecurringInvoice' => RecurringInvoice::class,
     ];
 
     private static $has_many = [
@@ -59,12 +63,22 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
 
     public function getNextInvoiceNumber()
     {
-        if (preg_match('/^(\\d{4})-(\\d{4})$/', $this->InvoiceNumber, $matches)) {
-            $year = $matches[1];
-            $number = (int)$matches[2] + 1;
-            return sprintf('%s-%04d', $year, $number);
+        $currentYear = date('Y');
+    
+        // Provjeri format trenutnog broja (YYYY-XXXX)
+        if (preg_match('/^(\d{4})-(\d{4})$/', $this->InvoiceNumber, $matches)) {
+            $yearFromInvoice = $matches[1];
+            
+            // Ako je godina na zadnjem računu ista kao trenutna, samo uvećaj broj
+            if ($yearFromInvoice == $currentYear) {
+                $number = (int)$matches[2] + 1;
+                return sprintf('%s-%04d', $currentYear, $number);
+            }
         }
-        return $this->InvoiceNumber;
+        
+        // Ako je godina drugačija (nova godina) ili format nije prepoznat, 
+        // resetuj na 0001 za trenutnu godinu
+        return $currentYear . '-0001';
     }
 
     public function onBeforeWrite()
@@ -73,13 +87,25 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
 
         // set offer number if not set
         if ($this->InvoiceNumber == '') {
-            $lastInvoice = Invoice::get()->sort('Created', 'DESC')->first();
-            if ($lastInvoice && preg_match('/^(\\d{4})-(\\d{4})$/', $lastInvoice->InvoiceNumber)) {
-                $this->InvoiceNumber = $lastInvoice->getNextInvoiceNumber();
+            $currentYear = date('Y');
+    
+            // Tražimo zadnji račun isključivo u TEKUĆOJ godini
+            $lastInvoice = Invoice::get()
+                ->filter(['InvoiceNumber:StartsWith' => $currentYear])
+                ->sort('InvoiceNumber', 'DESC')
+                ->first();
+
+            if ($lastInvoice) {
+                // Ako postoji račun u ovoj godini, nastavi niz
+                $parts = explode('-', $lastInvoice->InvoiceNumber);
+                $nextSequence = (int)$parts[1] + 1;
+                $this->InvoiceNumber = $currentYear . '-' . str_pad($nextSequence, 4, '0', STR_PAD_LEFT);
             } else {
-                $this->InvoiceNumber = date('Y') . '-0001';
+                // Ako je nova godina i nema još računa, kreni od 0001
+                $this->InvoiceNumber = $currentYear . '-0001';
             }
         }
+
         if (!$this->DueDate) {
             $this->DueDate = date('Y-m-d', strtotime('+30 days'));
         }
@@ -93,6 +119,27 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
             1 => 'Gesendet',
             2 => 'Bezahlt',
         ];
+    }
+
+    public function getGermanStatusOptionsDataList()
+    {
+
+        // return false if invoice is cancelled, paid or connected to a cancellation
+        if ($this->Status >= 2 || $this->CancellationOfID > 0) {
+            return false;
+        }
+
+        $myList = ArrayList::create();
+        foreach ($this->getGermanStatusOptions() as $key => $value) {
+            $myItem = [
+                'isDisabled' => ($this->Status == 4 || $this->CancellationOfID > 0) ? 'true' : 'false',
+                'isActive' => ($this->Status == $key) ? 'active' : '',
+                'Key' => $key,
+                'Title' => $value,
+            ];
+            $myList->push($myItem);
+        }
+        return $myList;
     }
 
     public function getTotalNetto(): float|int
@@ -120,11 +167,17 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
         return (float) number_format($myBrutto, 2, '.', '');
     }
 
+    public function getTotalBruttoAsString(): string
+    {
+        return  '€ ' . number_format($this->getTotalBrutto(), 2, ',', ' ');
+    }
+
     public function getGermanStatus() {
         return match ($this->Status) {
             0 => 'Entwurf',
             1 => 'Gesendet',
             2 => 'Bezahlt',
+            3 => 'Storniert',
             default => 'Unbekannt'
         };
     }
@@ -150,13 +203,38 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
             $email->setTo($client->Email);
             $email->setFrom($config->CompanyContactEmail);
             $email->setSubject('Rechnung ' . $this->InvoiceNumber);
-            $email->setBody(DBField::create_field('HTMLText', $config->EmailInvoiceText));
+            //$email->setBody(DBField::create_field('HTMLText', $config->EmailInvoiceText));
+            $email->setBody($config->EmailInvoiceText);
             $email->addAttachmentFromData($pdfContent, 'Rechnung-' . $this->InvoiceNumber . '.pdf', 'application/pdf');
-            $email->send();
-            //$this->Status = 1; // Sent
+            $email->sendPlain();
+            // update status if is Draft
+            if ($this->Status == 0) {
+                $this->Status = 1; // Sent
+            }
             $this->write();
             return true;
         }
         return false;
+    }
+
+    public function checkEditingStatus() {
+        if ($this->Status >= 2) { // not Draft
+            return false;
+        }
+        return true;
+    }
+
+
+    // check if invoice can be cancelled
+    // maybe can be used under checkEditingStatus function but for now separately
+    public function canBeCancelled() {
+        if ($this->Status >= 2 || $this->CancellationOfID > 0) { // Paid or already cancelled
+            return false;
+        }
+        return true;
+    }
+
+    public function getFirstInvoicePage() {
+        return InvoicePage::get()->first();
     }
 }

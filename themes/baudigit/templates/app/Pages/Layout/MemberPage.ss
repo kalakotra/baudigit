@@ -6,7 +6,7 @@
                     <!-- Future: Add member actions like reset password, disable account, etc. -->
                 </div>
                 <div class="col-12 col-lg-6 text-end">
-                    <a href="{$Top.Link}" class="btn btn-primary px-4">Zurück zur Übersicht</a>
+                    <a href="{$Top.Link}" class="btn btn-sm btn-primary px-4">Zurück zur Übersicht</a>
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
     <% if $checkAdd %>
         <div class="card">
             <div class="card-header text-end">
-                <a href="{$Top.Link}" class="btn btn-primary px-4">Zurück zur Übersicht</a>
+                <a href="{$Top.Link}" class="btn btn-sm btn-primary px-4">Zurück zur Übersicht</a>
             </div>
         </div>
         <div class="card">
@@ -48,7 +48,7 @@
     <% else %>
         <div class="card">
             <div class="card-header text-end">
-                <a type="button" class="btn btn-success px-4" href="{$Top.Link}/?a=1">Benutzer erstellen</a>
+                <a type="button" class="btn btn-sm btn-success px-4" href="{$Top.Link}/?a=1">Benutzer erstellen</a>
             </div>
         </div>
         <div class="card">

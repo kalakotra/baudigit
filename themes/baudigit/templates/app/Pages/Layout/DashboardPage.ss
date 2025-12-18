@@ -803,7 +803,7 @@
               <div class="text-center">
                 <h3>$84,256</h3>
                 <p class="mb-3">Vestibulum fermentum nisl id nulla ultricies convallis.</p>
-                <button class="btn btn-grd btn-grd-info rounded-5 px-4">Increase Budget</button>
+                <button class="btn btn-grd btn-sm btn-grd-info rounded-5 px-4">Increase Budget</button>
               </div>
             </div>
           </div>

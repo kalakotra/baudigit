@@ -47,6 +47,7 @@ class ProjectPageController extends \PageController
         'addTaskForm',
         'editTaskForm',
         'deleteTask',
+        'changeProjectStatus'
     ];
 
     public function readAllInputs() {
@@ -80,6 +81,24 @@ class ProjectPageController extends \PageController
         return false;
     }
 
+    public function changeProjectStatus() {
+        $project = $this->actProject();
+        if ($project) {
+            $newStatus = $this->getRequest()->getVar('status');
+            $validStatuses = array_keys($project->getGermanStatusOptions());
+            if (is_numeric($newStatus) && in_array((int)$newStatus, $validStatuses)) {
+                $project->Status = (int)$newStatus;
+                $project->write();
+
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Projektstatus erfolgreich geändert.');
+                return $this->redirectBack();
+            }
+        }
+
+        $this->setNotifySessionData('error', 'bi bi-x-circle', 'Fehler beim Ändern des Projektstatus.');
+        return $this->redirectBack();
+    }
+
     public function add() {
         $allClients = Client::get()->map('ID', 'Company')->toArray();
         $clientGroupedList = [];
@@ -96,17 +115,10 @@ class ProjectPageController extends \PageController
             GroupedDropdownField::create('ClientObjectID', 'Kunde', $clientGroupedList)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select select2me')->setEmptyString('-- bitte wählen --'),
             DateField::create('StartDate', 'Startdatum')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             DateField::create('EndDate', 'Enddatum')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            DropdownField::create('Status', 'Status', [
-                0 => 'Neu',
-                1 => 'Laufend',
-                2 => 'Abgeschlossen',
-                3 => 'Abgerechnet',
-                4 => 'Storniert',
-            ])->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select')->setValue(0)
         );
 
         $action = FieldList::create(
-            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
+            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4  mb-2')
         );
 
         $required = RequiredFields::create([
@@ -130,7 +142,7 @@ class ProjectPageController extends \PageController
 
             // add cancel button/link
             $action->push(
-                LiteralField::create('cancel', '<a href="javascript:history.back()" class="btn btn-secondary px-4 mb-2 ms-2">Abbrechen</a>')
+                LiteralField::create('cancel', '<a href="javascript:history.back()" class="btn btn-sm btn-secondary px-4 mb-2 ms-2">Abbrechen</a>')
             );
             
         }
@@ -169,7 +181,7 @@ class ProjectPageController extends \PageController
             );
 
             $action = FieldList::create(
-                $submitAction = FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+                $submitAction = FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
             );
 
             if ($project->Status == 2 || $project->Status == 3 || $project->Status == 4) {
@@ -241,7 +253,7 @@ class ProjectPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAddMember', 'Hinzufügen')->addExtraClass('btn btn-primary px-4 mb-2')
+            FormAction::create('doAddMember', 'Hinzufügen')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
         );
         
         $required = RequiredFields::create([
@@ -296,7 +308,7 @@ class ProjectPageController extends \PageController
                 );
 
                 $action = FieldList::create(
-                    FormAction::create('doEditMember', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+                    FormAction::create('doEditMember', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
                 );
                 
                 $required = RequiredFields::create([
@@ -406,7 +418,7 @@ class ProjectPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doUploadDocuments', 'Hochladen')->addExtraClass('btn btn-success px-4 mb-2')
+            FormAction::create('doUploadDocuments', 'Hochladen')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
         );
 
         $required = RequiredFields::create([
@@ -449,7 +461,7 @@ class ProjectPageController extends \PageController
                 $project->write();
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Dateien erfolgreich hochgeladen.');
-                return $this->redirect($this->Link('?e=' . $project->ID));
+                return $this->redirect($this->Link('?e=' . $project->ID . '&activetab=project_documents'));
             }
         }
 
@@ -481,7 +493,7 @@ class ProjectPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAddDocument', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+            FormAction::create('doAddDocument', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
         );
         
         $required = RequiredFields::create([
@@ -557,7 +569,7 @@ class ProjectPageController extends \PageController
                 );
 
                 $action = FieldList::create(
-                    FormAction::create('doEditDocument', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+                    FormAction::create('doEditDocument', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
                 );
                 
                 $required = RequiredFields::create([
@@ -685,12 +697,12 @@ class ProjectPageController extends \PageController
                 ->setFieldHolderTemplate('FormField_customholder')
                 ->setAttribute('class', 'form-select')
                 ->setMultiple(true),*/
-            CheckboxField::create('NeedsConfirmation', 'Benötigt Bestätigung'),
+            //CheckboxField::create('NeedsConfirmation', 'Benötigt Bestätigung'),
             HiddenField::create('e', 'Projekt')->setValue($this->checkEdit())
         );
 
         $action = FieldList::create(
-            FormAction::create('doAddTask', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+            FormAction::create('doAddTask', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
         );
         
         $required = RequiredFields::create([
@@ -738,8 +750,8 @@ class ProjectPageController extends \PageController
 
                 $action = FieldList::create(
                     // add cancel button/link
-                    LiteralField::create('cancel', '<a href="'.$this->Link("?e=" . $projectTask->ProjectID . "&activetab=project_tasks").'" class="btn btn-secondary px-4 mb-2 me-2">Abbrechen</a>'),
-                    FormAction::create('doEditTask', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+                    LiteralField::create('cancel', '<a href="'.$this->Link("?e=" . $projectTask->ProjectID . "&activetab=project_tasks").'" class="btn btn-sm btn-secondary px-4 mb-2 me-2">Abbrechen</a>'),
+                    FormAction::create('doEditTask', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
                 );
                 
                 $required = RequiredFields::create([

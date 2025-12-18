@@ -1808,7 +1808,7 @@ progress {
 	}
 }
 .form-label {
-	margin-bottom: .5rem
+	margin-top: .5rem
 }
 .col-form-label {
 	padding-top: calc(.375rem + var(--bs-border-width));
@@ -1891,7 +1891,8 @@ div.form-control {
 	color: var(--bs-secondary-color);
 	opacity: 1
 }
-.form-control:disabled {
+.form-control:disabled,
+.form-control[readonly] {
 	background-color: var(--bs-secondary-bg);
 	opacity: 1
 }

@@ -3,6 +3,7 @@
 namespace app\Models;
 
 use app\Models\OfferArticle;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Email\Email;
@@ -156,9 +157,24 @@ class Offer extends DataObject implements PermissionProvider, i18nEntityProvider
             0 => 'Entwurf',
             1 => 'Gesendet',
             2 => 'Akzeptiert',
-            3 => 'Projekt',
+           /// 3 => 'Projekt',
             4 => 'Abgelehnt',
         ];
+    }
+
+    public function getGermanStatusOptionsDataList()
+    {
+
+        $myList = ArrayList::create();
+        foreach ($this->getGermanStatusOptions() as $key => $value) {
+            $myItem = [
+                'isActive' => ($this->Status == $key) ? 'active' : '',
+                'Key' => $key,
+                'Title' => $value,
+            ];
+            $myList->push($myItem);
+        }
+        return $myList;
     }
 
     public function getPDF() {
@@ -184,9 +200,9 @@ class Offer extends DataObject implements PermissionProvider, i18nEntityProvider
             $email->setSubject('Angebot ' . $this->OfferNumber);
             $email->setBody(DBField::create_field('HTMLText', $config->EmailOfferText));
             $email->addAttachmentFromData($pdfContent, 'Angebot-' . $this->OfferNumber . '.pdf', 'application/pdf');
-            $email->send();
-            $this->Status = 1; //Sent
-            $this->write();
+            $email->sendPlain();
+            //$this->Status = 1; //Sent
+            //$this->write();
             return true;
         }
         return false;

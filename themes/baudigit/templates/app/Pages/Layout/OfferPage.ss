@@ -2,21 +2,26 @@
     <div class="card">
         <div class="card-header">
             <div class="row">
-                <div class="col-12 col-lg-6">
+                <div class="col-12 col-lg-2">
                     <div class="btn-group">
-                        <button type="button" class="btn btn-success" data-bs-toggle="dropdown">Options</button>
-                        <button type="button" class="btn btn-success split-bg-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">	<span class="visually-hidden">Toggle Dropdown</span>
+                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="dropdown">Options</button>
+                        <button type="button" class="btn btn-sm btn-success split-bg-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">	<span class="visually-hidden">Toggle Dropdown</span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end">
                             <a href="{$Top.Link}/previewPDF?e={$checkEdit}" class="dropdown-item" target="_blank"><i class="bx bx-search " ></i>Vorschau</a>
                             <a href="{$Top.Link}/send?e={$checkEdit}" class="dropdown-item yousure" ><i class="bx bx-envelope " ></i>Versenden</a>
                             <a href="{$Top.Link}/toInvoice?e={$checkEdit}" class="dropdown-item yousure" ><i class="bx bx-list-check" ></i>Rechnung</a>
-                            <a href="{$Top.getMyClass(app\Pages\ProjectPage).First().Link}/?a=1&o=$checkEdit" class="dropdown-item yousure" ><i class="bx bx-folder-open" ></i>Projekt</a>
+                            <% if $checkProjectModule %>
+                                <a href="{$Top.getMyClass(app\Pages\ProjectPage).First().Link}/?a=1&o=$checkEdit" class="dropdown-item yousure" ><i class="bx bx-folder-open" ></i>Projekt</a>
+                            <% end_if %>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-6 text-end">
-                    <a href="{$Top.Link}" class="btn btn-primary px-4">Zurück zur Übersicht</a>
+                <div class="col-12 col-lg-8" >
+                    <% include Includes/OfferPage/OfferStatusSwitch %>
+                </div>
+                <div class="col-12 col-lg-2 text-end">
+                    <a href="{$Top.Link}" class="btn btn-sm btn-primary px-4">Zurück zur Übersicht</a>
                 </div>
             </div>
         </div>
@@ -69,7 +74,7 @@
     <% if $checkAdd %>
         <div class="card">
             <div class="card-header text-end">
-                <a href="{$Top.Link}" class="btn btn-primary px-4">Zurück zur Übersicht</a>
+                <a href="{$Top.Link}" class="btn btn-sm btn-primary px-4">Zurück zur Übersicht</a>
             </div>
         </div>
         <div class="card">
@@ -82,7 +87,7 @@
     <% else %>
         <div class="card">
             <div class="card-header text-end">
-                <a type="button" class="btn btn-success px-4" href="{$Top.Link}/?a=1">Angebot erstellen</a>
+                <a type="button" class="btn btn-sm btn-success px-4" href="{$Top.Link}/?a=1">Angebot erstellen</a>
             </div>
         </div>
         <div class="card">

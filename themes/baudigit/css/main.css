@@ -317,6 +317,10 @@ input::placeholder {
   background-color: #efefef;
 }
 
+.top-header .appLogo img {
+  padding: 10px;
+}
+
 .top-header .nav-right-links {
   display: none;
 }

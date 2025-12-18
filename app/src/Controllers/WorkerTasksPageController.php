@@ -103,8 +103,8 @@ class WorkerTasksPageController extends \PageController
             */
             
             $actionFields = FieldList::create(
-                FormAction::create('doWorkerTasksTimeForm', 'Stunden erfassen')->addExtraClass('btn btn-success px-4 mb-2 w-100'),
-                LiteralField::create('doCancel', '<a href="'.$this->Link().'" class="btn btn-secondary px-4 mb-2 w-100">Abbrechen</a>')
+                FormAction::create('doWorkerTasksTimeForm', 'Stunden erfassen')->addExtraClass('btn btn-sm btn-success px-4 mb-2 w-100'),
+                LiteralField::create('doCancel', '<a href="'.$this->Link().'" class="btn btn-sm btn-secondary px-4 mb-2 w-100">Abbrechen</a>')
             );
 
             $form = Form::create(

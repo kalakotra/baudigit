@@ -315,7 +315,7 @@ $(function () {
     //table.buttons().container().appendTo( '#offerListTable_paginate' );
 
     // if #projectListTable order by first column desc
-    if ($('#projectListTable, #offerListTable').length) {
+    if ($('#projectListTable, #offerListTable, #invoicePageInvoiceListTable').length) {
       dataTable.order([0, 'desc']).draw();
     }
   }

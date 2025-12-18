@@ -2,11 +2,11 @@
     <div class="card">
         <div class="card-header text-end">
             <% if checkLocationList %>
-                <a href="{$Top.Link}?e=$checkEdit&al=1" class="btn btn-primary px-4">Standort hinzufügen</a>
+                <a href="{$Top.Link}?e=$checkEdit&al=1" class="btn btn-sm btn-primary px-4">Standort hinzufügen</a>
             <% else %>
-                <a href="{$Top.Link}?e=$checkEdit&el=0" class="btn btn-primary px-4">Standorte</a>
+                <a href="{$Top.Link}?e=$checkEdit&el=0" class="btn btn-sm btn-primary px-4">Standorte</a>
             <% end_if %>
-            <a href="{$Top.Link}" class="btn btn-primary px-4">Zurück zur Kundenübersicht</a>
+            <a href="{$Top.Link}" class="btn btn-sm btn-primary px-4">Zurück zur Kundenübersicht</a>
         </div>
     </div>
     <div class="card">
@@ -55,7 +55,7 @@
     <% if $checkAdd %>
         <div class="card">
             <div class="card-header text-end">
-                <a href="{$Top.Link}" class="btn btn-primary px-4">Zurück zur Übersicht</a>
+                <a href="{$Top.Link}" class="btn btn-sm btn-primary px-4">Zurück zur Übersicht</a>
             </div>
         </div>
         <div class="card">
@@ -68,7 +68,7 @@
     <% else %>
         <div class="card">
             <div class="card-header text-end">
-                <a type="button" class="btn btn-primary px-4" href="{$Top.Link}/?a=1">Kunde erstellen</a>
+                <a type="button" class="btn btn-sm btn-primary px-4" href="{$Top.Link}/?a=1">Kunde erstellen</a>
             </div>
         </div>
         <div class="card">

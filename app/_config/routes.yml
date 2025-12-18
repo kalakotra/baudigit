@@ -1,0 +1,6 @@
+---
+Name: app-routes
+---
+SilverStripe\Control\Director:
+  rules:
+    'generate-recurring-invoice': 'app\CronJobs\RecurringInvoiceGenerator'

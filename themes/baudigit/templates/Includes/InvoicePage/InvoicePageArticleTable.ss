@@ -7,7 +7,9 @@
             <th class="text-end">Rabatt</th>
             <th class="text-end">MwSt.</th>
             <th class="text-end">Gesamtpreis</th>
-            <th></th>
+            <% if $actInvoice.checkEditingStatus %>
+                <th></th>
+            <% end_if %>
         </tr>
     </thead>
     <tbody>
@@ -19,27 +21,35 @@
                 <td class="text-end"> ({$Discount}%) $formatPrice($getDiscountAmount)</td>
                 <td class="text-end"> ({$TaxRate}%) $formatPrice($getTaxAmount)</td>
                 <td class="text-end">$formatPrice($FinalPrice)</td>
-                <td class="text-center"><a href="{$Top.Link}/?e=$InvoiceID&ea=$ID" class=""><i class="bx bx-edit-alt fs-4"></i></a><a href="{$Top.Link}/deleteArticle?e=$InvoiceID&da=$ID" class="yousure"><i class="bx bx-x-circle text-danger fs-4"></i></a></td>
+                <% if $Invoice.checkEditingStatus %>
+                    <td class="text-center"><a href="{$Top.Link}/?e=$InvoiceID&ea=$ID&activetab=invoice_article" class=""><i class="bx bx-edit-alt fs-4"></i></a><a href="{$Top.Link}/deleteArticle?e=$InvoiceID&da=$ID&activetab=invoice_article" class="yousure"><i class="bx bx-x-circle text-danger fs-4"></i></a></td>
+                <% end_if %>
             </tr>
         <% end_loop %>
     </tbody>
     <% with actInvoice %>
-    <tfoot>
-        <tr>
-            <th colspan="5" class="text-end">Gesamt (netto):</th>
-            <th class="text-end">$Top.formatPrice($getTotalNetto)</th>
-            <th></th>
-        </tr>
-        <tr>
-            <th colspan="5" class="text-end">Gesamt MwSt.:</th>
-            <th class="text-end">$Top.formatPrice($getTotalTax)</th>
-            <th></th>
-        </tr>
-        <tr>
-            <th colspan="5" class="text-end">Gesamt (brutto):</th>
-            <th class="text-end">$Top.formatPrice($getTotalBrutto)</th>
-            <th></th>
-        </tr>
-    </tfoot>
+        <tfoot>
+            <tr>
+                <th colspan="5" class="text-end">Gesamt (netto):</th>
+                <th class="text-end">$Top.formatPrice($getTotalNetto)</th>
+                <% if checkEditingStatus %>
+                    <th></th>
+                <% end_if %>
+            </tr>
+            <tr>
+                <th colspan="5" class="text-end">Gesamt MwSt.:</th>
+                <th class="text-end">$Top.formatPrice($getTotalTax)</th>
+                <% if checkEditingStatus %>
+                    <th></th>
+                <% end_if %>
+            </tr>
+            <tr>
+                <th colspan="5" class="text-end">Gesamt (brutto):</th>
+                <th class="text-end">$Top.formatPrice($getTotalBrutto)</th>
+                <% if checkEditingStatus %>
+                    <th></th>
+                <% end_if %>
+            </tr>
+        </tfoot>
     <% end_with %>
 </table>

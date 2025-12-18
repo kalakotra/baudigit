@@ -35,7 +35,9 @@ class InvoicePageController extends \PageController
         'editArticleForm',
         'deleteArticle',
         'previewPDF',
-        'send'
+        'send',
+        'cancellation',
+        'changeInvoiceStatus'
     ];
 
     public function readAllInputs() {
@@ -72,6 +74,25 @@ class InvoicePageController extends \PageController
         return false;
     }
 
+    public function changeInvoiceStatus() {
+        $id = $this->checkEdit();
+        $newStatus = $this->getRequest()->getVar('status');
+
+        if ($id && is_numeric($id) && is_numeric($newStatus)) {
+            $invoice = Invoice::get()->byID($id);
+            if ($invoice && $invoice->Status != 3 && $invoice->CancellationID == 0) { // do not change status if invoice is cancelled or connected to a cancellation
+                $invoice->Status = intval($newStatus);
+                $invoice->write();
+
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Rechnungsstatus erfolgreich geändert.');
+                return $this->redirectBack();
+            }
+        }
+
+        $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Fehler beim Ändern des Rechnungsstatus.');
+        return $this->redirectBack();
+    }
+
     public function add() {
         // get last invoice to suggest next invoice number, format YYYY-0001
         $lastInvoice = Invoice::get()->sort('Created', 'DESC')->first();
@@ -90,7 +111,7 @@ class InvoicePageController extends \PageController
         // due date next 14 days
         $dueDate = date('Y-m-d', strtotime('+14 days'));
         $formFields = FieldList::create(
-            TextField::create('InvoiceNumber', 'Rechnungsnummer', $nextInvoiceNumber)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control')->setReadonly(true),
+            TextField::create('InvoiceNumber', 'Rechnungsnummer', $nextInvoiceNumber)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control')->setReadonly(true)->setDisabled(true),
             DateField::create('DueDate', 'Fälligkeitsdatum', $dueDate)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
             GroupedDropdownField::create('ClientObjectID', 'Kunde', $clientGroupedList)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select select2me')->setEmptyString('-- bitte wählen --'),
             TextareaField::create('IntroText', 'Einleitungstext', $config->InvoiceIntroText)->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
@@ -98,7 +119,7 @@ class InvoicePageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
+            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4  mb-2')
         );
 
         $required = RequiredFields::create([
@@ -125,7 +146,7 @@ class InvoicePageController extends \PageController
             );
             // add cancel button/link
             /*$action->push(
-                LiteralField::create('cancel', '<a href="javascript:history.back()" class="btn btn-secondary px-4 mb-2 ms-2">Abbrechen</a>')
+                LiteralField::create('cancel', '<a href="javascript:history.back()" class="btn btn-sm btn-secondary px-4 mb-2 ms-2">Abbrechen</a>')
             );*/
         }
 
@@ -159,25 +180,37 @@ class InvoicePageController extends \PageController
         if ($invoice) {
             $addForm = $this->add();
 
+            $editFields = $addForm->Fields();
+
+            
+
             // add hidden field with id
-            $addForm->Fields()->push(
+            $editFields->push(
                 HiddenField::create('e', 'ID')->setValue($invoice->ID)
             );
 
-            $addForm->Fields()->push(
+            /*$editFields->unshift(
                 DropdownField::create('Status', 'Status', Invoice::singleton()->getGermanStatusOptions())->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')
-            );
+            );*/
 
             $action = FieldList::create(
-                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-success px-4 mb-2')
+                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
             );
+            if (!$invoice->checkEditingStatus()) {
+                foreach ($editFields as $field) {
+                    $field->setReadonly(true)->setDisabled(true);
+                }
+
+                $action = FieldList::create(
+                );
+            }
 
             $required = RequiredFields::create([
                 'InvoiceNumber',
                 'ClientObjectID',
             ]);
 
-            $form = Form::create($this, 'edit', $addForm->Fields(), $action, $required);
+            $form = Form::create($this, 'edit', $editFields, $action, $required);
 
             $form->loadDataFrom($invoice);
 
@@ -256,7 +289,7 @@ class InvoicePageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAddArticle', 'Hinzufügen')->addExtraClass('btn btn-success px-4 mb-2')
+            FormAction::create('doAddArticle', 'Hinzufügen')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
         );
         $required = RequiredFields::create([
             'Quantity',
@@ -301,7 +334,7 @@ class InvoicePageController extends \PageController
                 );
 
                 $action = FieldList::create(
-                    FormAction::create('doEditArticle', 'Speichern')->addExtraClass('btn btn-success px-4  mb-2')
+                    FormAction::create('doEditArticle', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4  mb-2')
                 );
                 $required = RequiredFields::create([
                     'Quantity',
@@ -389,5 +422,46 @@ class InvoicePageController extends \PageController
                 $invoiceArticle->write();
             }
         }
+    }
+
+
+    // cancellation of invoice. Set status to cancelled (3) and add new negative invoice
+    public function cancellation() {
+        $invoice = $this->actInvoice();
+        if ($invoice) {
+            // set status to cancelled
+            $invoice->Status = 3; // Cancelled
+            $invoice->write();
+
+            // create new negative invoice
+            $cancellationInvoice = new Invoice();
+            //$cancellationInvoice->InvoiceNumber = $invoice->InvoiceNumber . '-STORNO';
+            $cancellationInvoice->ClientObjectID = $invoice->ClientObjectID;
+            $cancellationInvoice->DueDate = date('Y-m-d');
+            $cancellationInvoice->IntroText = 'Stornorechnung für Rechnung ' . $invoice->InvoiceNumber . '.';
+            $cancellationInvoice->OutroText = 'Diese Rechnung wurde automatisch als Stornorechnung erstellt.';
+            $cancellationInvoice->Status = 2; // Paid
+            $cancellationInvoice->CancellationOfID = $invoice->ID;
+            $cancellationInvoice->write();
+
+            // copy all invoice articles with negative quantities
+            $invoiceArticles = $invoice->InvoiceArticles();
+            foreach ($invoiceArticles as $invoiceArticle) {
+                $newArticle = new InvoiceArticle();
+                $newArticle->InvoiceID = $cancellationInvoice->ID;
+                $newArticle->Title = $invoiceArticle->Title;
+                $newArticle->Description = $invoiceArticle->Description;
+                $newArticle->Quantity = -1 * $invoiceArticle->Quantity;
+                $newArticle->Unit = $invoiceArticle->Unit;
+                $newArticle->SellPriceNetto = $invoiceArticle->SellPriceNetto;
+                $newArticle->Discount = $invoiceArticle->Discount;
+                $newArticle->TaxRate = $invoiceArticle->TaxRate;
+                $newArticle->FinalPrice = -1 * $invoiceArticle->FinalPrice;
+                $newArticle->SourceArticleID = $invoiceArticle->SourceArticleID;
+                $newArticle->write();
+            }
+        }
+        $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Stornorechnung erfolgreich erstellt.');
+        return $this->redirect($this->Link('?e=' . $cancellationInvoice->ID));
     }
 }

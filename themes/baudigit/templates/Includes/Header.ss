@@ -1,6 +1,6 @@
 <!--start header-->
   <header class="top-header">
-    <nav class="navbar navbar-expand align-items-center gap-4">
+    <nav class="navbar navbar-expand align-items-center gap-4 justify-content-between">
       <div class="btn-toggle">
         <a href="javascript:;"><i class="material-icons-outlined">menu</i></a>
       </div>
@@ -48,7 +48,11 @@
           
         </li>
       </ul>
-
+      <% if SiteConfig.Logo %>
+        <div class="appLogo">$SiteConfig.Logo.ScaleMaxWidth(120)</div>
+      <% else %>
+        <h1 class="h4 mb-0">$SiteConfig.Title</h1>
+      <% end_if %>
     </nav>
   </header>
   <!--end top header-->

@@ -2,14 +2,17 @@
     <div class="card">
         <div class="card-header">
             <div class="row">
-                <div class="col-12 col-lg-6">
+                <div class="col-12 col-lg-2">
                     <!--  if status is Completed add button to copy to invoice-->
                     <% if actProject.Status==2 %>
-                        <a href="{$Top.getMyClass(app\Pages\InvoicePage).First().Link}/?a=1&p=$actProject.ID" class="btn btn-success px-4">In Rechnung umwandeln</a>
+                        <a href="{$Top.getMyClass(app\Pages\InvoicePage).First().Link}/?a=1&p=$actProject.ID" class="btn btn-sm btn-success px-4">In Rechnung umwandeln</a>
                     <% end_if %>
                 </div>
-                <div class="col-12 col-lg-6 text-end">
-                    <a href="{$Top.Link}" class="btn btn-primary px-4">Zurück zur Übersicht</a>
+                <div class="col-12 col-lg-8" >
+                    <% include Includes/ProjectPage/ProjectStatusSwitch %>
+                </div>
+                <div class="col-12 col-lg-2 text-end">
+                    <a href="{$Top.Link}" class="btn btn-sm btn-primary px-4">Zurück zur Übersicht</a>
                 </div>
             </div>
         </div>
@@ -82,7 +85,7 @@
     <% if $checkAdd %>
         <div class="card">
             <div class="card-header text-end">
-                <a href="{$Top.Link}" class="btn btn-primary px-4">Zurück zur Übersicht</a>
+                <a href="{$Top.Link}" class="btn btn-sm btn-primary px-4">Zurück zur Übersicht</a>
             </div>
         </div>
         <div class="card">
@@ -95,7 +98,7 @@
     <% else %>
         <div class="card">
             <div class="card-header text-end">
-                <a type="button" class="btn btn-success px-4" href="{$Top.Link}/?a=1">Projekt erstellen</a>
+                <a type="button" class="btn btn-sm btn-success px-4" href="{$Top.Link}/?a=1">Projekt erstellen</a>
             </div>
         </div>
         <div class="card">

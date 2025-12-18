@@ -68,7 +68,7 @@ class MemberPageController extends \PageController
         );
 
         $action = FieldList::create(
-            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-primary px-4 mb-2')
+            FormAction::create('doAdd', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
         );
 
         $required = RequiredFields::create([
@@ -147,7 +147,7 @@ class MemberPageController extends \PageController
             );*/
 
             $action = FieldList::create(
-                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-primary px-4 mb-2')
+                FormAction::create('doEdit', 'Speichern')->addExtraClass('btn btn-sm btn-success px-4 mb-2')
             );
 
             $required = RequiredFields::create([

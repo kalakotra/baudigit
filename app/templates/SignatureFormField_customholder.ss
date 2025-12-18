@@ -8,6 +8,6 @@
 	<% if $Message %><span class="message $MessageType">$Message</span><% end_if %>
 	<% if $Description %><span class="description">$Description</span><% end_if %>
     <div>
-        <button type="button" id="{$HolderID}_clearSignature" class="btn btn-warning clearSignature">Unterschrift löschen</button>
+        <button type="button" id="{$HolderID}_clearSignature" class="btn btn-sm btn-warning clearSignature">Unterschrift löschen</button>
     </div>
 </div>
