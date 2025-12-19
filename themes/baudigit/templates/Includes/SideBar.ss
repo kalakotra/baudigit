@@ -21,7 +21,7 @@
               <% if MenuSeparator %>
                 <li class="menu-label">$MenuSeparator</li>
               <% end_if %>
-              <li>
+              <li class="<% if $LinkingMode !='link' %>mm-active<% end_if %>">
                 <% if Children && $LinkingMode!='link' %>
                   <a href="javascript:;" >
                     <div class="parent-icon">
@@ -35,7 +35,7 @@
                   </a>
                   <ul>
                     <% loop Children %>
-                      <li>
+                      <li class="<% if $LinkingMode !='link' %>mm-active<% end_if %>">
                         <a href="$Link"><i class="material-icons-outlined">arrow_right</i>$MenuTitle.XML</a>
                       </li>
                     <% end_loop %>

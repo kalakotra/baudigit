@@ -14,17 +14,9 @@
 <% else %>
     <div class="card">
         <div class="card-header text-end">
-            <button type="button" class="btn btn-sm btn-primary px-4" data-bs-toggle="modal" data-bs-target="#FormModal">Produkt erstellen</button>
+            <button type="button" class="btn btn-sm btn-success px-4" data-bs-toggle="modal" data-bs-target="#FormModal">Produkt erstellen</button>
         </div>
     </div>
-    <% with add %>
-        <% if $Message %>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                $Message
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <% end_if %>
-    <% end_with %>
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
