@@ -7,7 +7,7 @@
                 <th>Kunde</th>
                 <th>Gesamt (brutto)</th>
                 <th>Status</th>
-                <th></th>
+                <th data-orderable="false"></th>
             </tr>
         </thead>
         <tbody>
@@ -18,9 +18,9 @@
                     </td>
                     <td>$OfferNumber</td>
                     <td>$ClientObject.getFullName</td>
-                    <td>$getTotalBrutto</td>
+                    <td class="text-end">$Top.formatPrice($getTotalBrutto)</td>
                     <td>$getGermanStatus</td>
-                    <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt"></i></a></td>
+                    <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt fs-5"></i></a></td>
                 </tr>
             <% end_loop %>
         </tbody>

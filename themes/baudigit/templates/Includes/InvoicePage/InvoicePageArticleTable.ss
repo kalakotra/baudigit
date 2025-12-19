@@ -8,7 +8,7 @@
             <th class="text-end">MwSt.</th>
             <th class="text-end">Gesamtpreis</th>
             <% if $actInvoice.checkEditingStatus %>
-                <th></th>
+                <th data-orderable="false"></th>
             <% end_if %>
         </tr>
     </thead>
@@ -22,7 +22,7 @@
                 <td class="text-end"> ({$TaxRate}%) $formatPrice($getTaxAmount)</td>
                 <td class="text-end">$formatPrice($FinalPrice)</td>
                 <% if $Invoice.checkEditingStatus %>
-                    <td class="text-center"><a href="{$Top.Link}/?e=$InvoiceID&ea=$ID&activetab=invoice_article" class=""><i class="bx bx-edit-alt fs-4"></i></a><a href="{$Top.Link}/deleteArticle?e=$InvoiceID&da=$ID&activetab=invoice_article" class="yousure"><i class="bx bx-x-circle text-danger fs-4"></i></a></td>
+                    <td class="text-center"><a href="{$Top.Link}/?e=$InvoiceID&ea=$ID&activetab=invoice_article" class=""><i class="bx bx-edit-alt fs-5"></i></a><a href="{$Top.Link}/deleteArticle?e=$InvoiceID&da=$ID&activetab=invoice_article" class="yousure"><i class="bx bx-x-circle text-danger fs-5"></i></a></td>
                 <% end_if %>
             </tr>
         <% end_loop %>

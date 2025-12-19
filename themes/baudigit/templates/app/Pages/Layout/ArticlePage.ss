@@ -41,7 +41,7 @@
                                 <td>$SellPriceNetto</td>
                                 <td>$SellPriceBrutto</td>
                                 <td>$Description</td>
-                                <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt"></i></a></td>
+                                <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt fs-5"></i></a></td>
                             </tr>
                         <% end_loop %>
                     </tbody>

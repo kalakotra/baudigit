@@ -6,7 +6,7 @@
             <th>Zugewiesen an</th>
             <th>Dauer</th>
             <th>Status</th>
-            <th></th>
+            <th data-orderable="false"></th>
         </tr>
     </thead>
     <tbody>
@@ -40,7 +40,7 @@
                 </td>
                 <td class="text-center">
                     <a href="{$Top.Link}/?e=$ProjectID&et=$ID&activetab=project_tasks" class="" title="Bearbeiten">
-                        <i class="bx bx-edit-alt fs-4"></i>
+                        <i class="bx bx-edit-alt fs-5"></i>
                     </a>
                     <a href="{$Top.Link}/deleteTask?e=$ProjectID&dt=$ID&activetab=project_tasks" class="yousure d-none" title="Löschen">
                         <i class="bx bx-x-circle text-danger fs-4"></i>

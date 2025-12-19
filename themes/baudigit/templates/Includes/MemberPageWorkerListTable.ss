@@ -35,7 +35,7 @@
                     </td>
                     <td class="text-center">
                         <a href="{$Top.Link}/?e=$ID" class="" title="Bearbeiten">
-                            <i class="bx bx-edit-alt"></i>
+                            <i class="bx bx-edit-alt fs-5"></i>
                         </a>
                     </td>
                 </tr>

@@ -7,7 +7,7 @@
             <th class="text-end">Rabatt</th>
             <th class="text-end">MwSt.</th>
             <th class="text-end">Gesamtpreis</th>
-            <th></th>
+            <th data-orderable="false"></th>
         </tr>
     </thead>
     <tbody>

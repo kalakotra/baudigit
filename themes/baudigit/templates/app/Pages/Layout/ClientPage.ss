@@ -20,7 +20,7 @@
                                 <th>Adresse</th>
                                 <th>Ansprechpartner</th>
                                 <th>Beschreibung</th>
-                                <th></th>
+                                <th data-orderable="false"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -94,8 +94,8 @@
                                     <td>$Phone</td>
                                     <td>$Address <br />$PostalCode $City</td>
                                     <td class="text-center">
-                                        <a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt fs-4"></i></a>
-                                        <a href="{$Top.Link}/?e=$ID&el=0" class=""><i class="bx bx-buildings fs-4"></i></a>
+                                        <a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt fs-5"></i></a>
+                                        <a href="{$Top.Link}/?e=$ID&el=0" class=""><i class="bx bx-buildings fs-5"></i></a>
                                     </td>
                                 </tr>
                             <% end_loop %>

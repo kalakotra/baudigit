@@ -7,7 +7,7 @@
                 <th>Kunde</th>
                 <th>Kundenobjekt</th>
                 <th>Status</th>
-                <th></th>
+                <th data-orderable="false"></th>
             </tr>
         </thead>
         <tbody>
@@ -33,7 +33,7 @@
                         <% end_if %>
                     </td>
                     
-                    <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt"></i></a></td>
+                    <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt fs-5"></i></a></td>
                 </tr>
             <% end_loop %>
         </tbody>
