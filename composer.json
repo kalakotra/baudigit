@@ -27,7 +27,8 @@
         "tractorcow/silverstripe-autocomplete": "^5.0",
         "mpdf/mpdf": "^8.2",
         "unclecheese/dropzone": "5.x-dev",
-        "lekoala/silverstripe-filepond": "^1.4"
+        "lekoala/silverstripe-filepond": "^1.4",
+        "horstoeko/zugferd": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.6"
