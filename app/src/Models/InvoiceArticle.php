@@ -46,4 +46,8 @@ class InvoiceArticle extends Article
         $priceAfterDiscount = $this->getDiscountedPrice();
         return $priceAfterDiscount * ($this->TaxRate / 100);
     }
+
+    public function getBruttoPrice(): float|int {
+        return $this->getDiscountedPrice() + $this->getTaxAmount();
+    }
 }

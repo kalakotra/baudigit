@@ -88,6 +88,22 @@ class Article extends DataObject implements PermissionProvider, i18nEntityProvid
         ];
     }
 
+    // return unit by __BT-130 format
+    public function getUnitShortLabel()
+    {
+        $units = [
+            0 => 'STK',
+            1 => 'M',
+            2 => 'M2',
+            3 => 'M3',
+            4 => 'L',
+            5 => 'KG',
+            6 => 'STD',
+            7 => 'SNS',
+        ];
+        return isset($units[$this->Unit]) ? $units[$this->Unit] : 'UNB';
+    }
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();

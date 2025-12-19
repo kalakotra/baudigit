@@ -257,7 +257,7 @@ class InvoicePageController extends \PageController
                 if ($invoiceArticle && $invoiceArticle->InvoiceID == $invoice->ID) {
                     $invoiceArticle->delete();
                     $invoiceArticle->destroy();
-                    return $this->redirect($this->Link('?e=' . $invoice->ID));
+                    return $this->redirect($this->Link('?e=' . $invoice->ID. '&activetab=invoice_article'));
                 }
             }
         }
@@ -281,7 +281,7 @@ class InvoicePageController extends \PageController
             //HiddenField::create('BuyPriceBrutto', 'Einkaufspreis brutto')->setReadonly(true)->setDescription('Wird automatisch aus dem Nettopreis und der MwSt. berechnet.')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             NumericField::create('SellPriceNetto', 'Preis (netto)')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             //NumericField::create('SellPriceBrutto', 'Preis')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            NumericField::create('TaxRate', 'MwSt. (%)', $config->InvoiceTax)->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'), //->setReadonly(true),
+            NumericField::create('TaxRate', 'MwSt. (%)', $config->InvoiceTax)->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true),
             TextareaField::create('Description', 'Beschreibung')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setRows(2),
             
             HiddenField::create('SourceArticleID'),
@@ -313,10 +313,14 @@ class InvoicePageController extends \PageController
                 $article = InvoiceArticle::create();
                 $form->saveInto($article);
                 $article->InvoiceID = $invoice->ID;
+
+                $config = SiteConfig::current_site_config();
+                $article->TaxRate = $config->InvoiceTax;
+
                 $article->write();
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich gespeichert.');
-                return $this->redirectBack();
+                return $this->redirect($this->Link('?e=' . $invoice->ID. '&activetab=invoice_article'));
             }
         }
         $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Fehler beim Hinzufügen des Artikels.');
@@ -363,7 +367,7 @@ class InvoicePageController extends \PageController
                 $invoiceArticle->write();
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich gespeichert.');
-                return $this->redirect($this->Link('?e=' . $invoiceArticle->InvoiceID));
+                return $this->redirect($this->Link('?e=' . $invoiceArticle->InvoiceID. '&activetab=invoice_article'));
             }
         }
         $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Fehler beim Speichern des Artikels.');

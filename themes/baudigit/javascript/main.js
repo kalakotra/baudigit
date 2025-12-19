@@ -158,7 +158,8 @@ $(function () {
       $("#Form_addArticleForm_Title").val(selectedOption.data("title"));
       $("#Form_addArticleForm_SourceArticleID").val(selectedOption.data("id"));
       $("#Form_addArticleForm_Unit").val(selectedOption.data("unit"));
-      $("#Form_addArticleForm_SellPriceNetto").val(selectedOption.data("nettoprice").toFixed(2));
+      // conver selectedOption.data("nettoprice").toFixed(2) to 2 decimal places german
+      $("#Form_addArticleForm_SellPriceNetto").val(selectedOption.data("nettoprice").toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 
     } else {
       $("#Form_addArticleForm_SourceArticleID").val(0);
@@ -352,15 +353,15 @@ $(function () {
       var type = $(this).attr('type') || 'info';
       var icon = $(this).attr('icon') || 'bi bi-info-circle';
       var message = $(this).attr('message') || '';
-    Lobibox.notify(type, {
-      pauseDelayOnHover: true,
-      continueDelayOnInactiveTab: false,
-      position: 'top right',
-      width: 300,
-      icon: icon,
-      title: '',
-      msg: message
-    });
+      Lobibox.notify(type, {
+        pauseDelayOnHover: true,
+        continueDelayOnInactiveTab: false,
+        position: 'top right',
+        width: 300,
+        icon: icon,
+        title: '',
+        msg: message
+      });
     });
   }  /* end notify me */
 

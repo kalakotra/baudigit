@@ -23,7 +23,21 @@
                     <td data-order="$Created.Format('yyyyMMdd')">$Created.Format('dd.MM.yyyy')</td>
                     <td data-order="$DueDate.Format('yyyyMMdd')">$DueDate.Format('dd.MM.yyyy')</td>
                     <td class="text-end">$getTotalBruttoAsString</td>
-                    <td class="text-end">$getGermanStatus</td>
+                    <td class="text-end">
+                        <% if Status == 0 %>
+                            <span class="badge bg-secondary">$getGermanStatus</span>
+                        <% else_if Status == 1 %>
+                            <span class="badge bg-warning">$getGermanStatus</span>
+                        <% else_if Status == 2 %>
+                            <span class="badge bg-success">$getGermanStatus</span>
+                        <% else_if Status == 3 %>
+                            <span class="badge bg-danger">$getGermanStatus</span>
+                        <% else_if Status == 4 %>
+                            <span class="badge bg-danger">$getGermanStatus</span>
+                        <% else %>
+                            <span class="badge bg-warning">$getGermanStatus</span>
+                        <% end_if %>
+                    </td>
                     <td class="text-end">
                         <% if not checkEditingStatus %>
                             <a href="{$Top.Link}/previewPDF/?e=$ID" target="_blank"><i class="bi bi-file-text bi-filetype-pdf fs-5 me-1"></i></a>

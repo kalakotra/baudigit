@@ -19,7 +19,21 @@
                     <td>$OfferNumber</td>
                     <td>$ClientObject.getFullName</td>
                     <td class="text-end">$Top.formatPrice($getTotalBrutto)</td>
-                    <td>$getGermanStatus</td>
+                    <td>
+                        <% if Status == 0 %>
+                            <span class="badge bg-secondary">$getGermanStatus</span>
+                        <% else_if Status == 1 %>
+                            <span class="badge bg-warning">$getGermanStatus</span>
+                        <% else_if Status == 2 %>
+                            <span class="badge bg-success">$getGermanStatus</span>
+                        <% else_if Status == 3 %>
+                            <span class="badge bg-info">$getGermanStatus</span>
+                        <% else_if Status == 4 %>
+                            <span class="badge bg-danger">$getGermanStatus</span>
+                        <% else %>
+                            <span class="badge bg-warning">$getGermanStatus</span>
+                        <% end_if %>
+                    </td>
                     <td class="text-center"><a href="{$Top.Link}/?e=$ID" class=""><i class="bx bx-edit-alt fs-5"></i></a></td>
                 </tr>
             <% end_loop %>

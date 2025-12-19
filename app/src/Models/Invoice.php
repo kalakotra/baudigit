@@ -2,18 +2,21 @@
 
 namespace app\Models;
 
+use app\Pages\InvoicePage;
 use app\Models\ClientObject;
 use app\Models\InvoiceArticle;
-use app\Pages\InvoicePage;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Email\Email;
+use horstoeko\zugferd\ZugferdProfiles;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\i18n\i18nEntityProvider;
 use Kalakotra\Utils\DataObjectPermissions;
+use horstoeko\zugferd\ZugferdDocumentBuilder;
 use SilverStripe\Security\PermissionProvider;
+use horstoeko\zugferd\ZugferdDocumentPdfMerger;
 
 class Invoice extends DataObject implements i18nEntityProvider, PermissionProvider
 {
@@ -142,7 +145,7 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
         return $myList;
     }
 
-    public function getTotalNetto(): float|int
+    public function getTotalNetto($raw = false)
     {
         $total = 0;
         foreach ($this->InvoiceArticles() as $article) {
@@ -151,7 +154,7 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
         return $total;
     }
 
-    public function getTotalTax(): float|int
+    public function getTotalTax($raw = false)
     {
         $total = 0;
         foreach ($this->InvoiceArticles() as $article) {
@@ -160,11 +163,15 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
         return $total;
     }
 
-    public function getTotalBrutto(): float|int
+    public function getTotalBrutto($raw = false): float|int
     {
         $myBrutto = $this->getTotalNetto() + $this->getTotalTax();
         // show always 2 decimal places
-        return (float) number_format($myBrutto, 2, '.', '');
+        if ($raw === false) {
+            return (float) number_format($myBrutto, 2, ',', '');
+        } else {
+            return (float) $myBrutto;
+        }
     }
 
     public function getTotalBruttoAsString(): string
@@ -182,11 +189,101 @@ class Invoice extends DataObject implements i18nEntityProvider, PermissionProvid
         };
     }
 
+    public function generateEInvoiceXML() {
+        $config = SiteConfig::current_site_config();
+        $invoiceData = $this;
+        $invoiceDate = \DateTime::createFromFormat("Ymd", $invoiceData->dbObject("Created")->Format("yyyyMMdd"));
+        $paymentDate = clone $invoiceDate;
+        if ($config->PaymentTermDays) {
+            $paymentDate->modify('+ '.$config->PaymentTermDays.' days');
+        } else {
+            $paymentDate->modify('+ 10 days');
+        }
+
+        $document = ZugferdDocumentBuilder::CreateNew(ZugferdProfiles::PROFILE_XRECHNUNG_3);
+        $document->setDocumentInformation($invoiceData->InvoiceNumber, "380", $invoiceDate, "EUR");
+        
+        $document->setDocumentSupplyChainEvent($invoiceDate);
+
+        $document->setDocumentBusinessProcess("urn:fdc:peppol.eu:2017:poacc:billing:01:1.0")
+            ->setDocumentSeller($config->CompanyName)
+            ->setDocumentSellerAddress($config->CompanyAddressLine1, $config->CompanyAddressLine2, $config->CompanyAddressLine3, $config->CompanyPostalCode, $config->CompanyCity, $config->CompanyCountry)
+            ->setDocumentSellerContact($config->CompanyContactPerson, "", $config->CompanyContactPhone, "", $config->CompanyContactEmail)
+            ->setDocumentSellerCommunication("EM", $config->CompanyContactEmail)
+
+            ->addDocumentNote($invoiceData->IntroText)
+            ->setDocumentSummation($invoiceData->getTotalBrutto(true), $invoiceData->getTotalBrutto(true), $invoiceData->getTotalNetto(true), 0.0, 0.0, $invoiceData->getTotalNetto(true), $invoiceData->getTotalTax(true), null, 0.0)
+
+            ->addDocumentSellerTaxRegistration("VA", $config->CompanyVATId)
+            ->addDocumentTax("S", "VAT", $invoiceData->getTotalNetto(true), $invoiceData->getTotalTax(), $config->InvoiceTax);
+
+        $paymenTermText = sprintf($config->PaymentTermText, $config->PaymentTermDays ?? 10);
+        $document->addDocumentPaymentTerm($paymenTermText, $invoiceData->paymentDate);
+        $document->addDocumentPaymentMean("42", "Payment to bank account", "", "" ,"" ,"", $config->PaymentIBAN, $config->PaymentAccountHolder, "", $config->PaymentBIC);
+
+        $document->setDocumentBuyer($invoiceData->ClientObject()->Client()->Company);
+        $document->setDocumentBuyerReference($invoiceData->ClientObject()->ClientID);
+
+        if($invoiceData->ClientObject()->Client()->Email) {
+            $document->setDocumentBuyerCommunication("EM", $invoiceData->ClientObject()->Client()->Email);
+        }else if($invoiceData->ClientObject()->ContactEmail) {
+            $document->setDocumentBuyerCommunication("EM", $invoiceData->ClientObject()->ContactEmail);
+        }
+
+        $addressLineOne = $invoiceData->ClientObject()->Client()->Address;
+        $addressLineTwo = "";
+        $addressLineThree = "";
+        $docPostcode = $invoiceData->ClientObject()->Client()->PostalCode;
+        $docCity = $invoiceData->ClientObject()->Client()->City;
+        $docCountry = "DE";
+
+        $document->setDocumentBuyerAddress($addressLineOne, $addressLineTwo, $addressLineThree, $docPostcode, $docCity, $docCountry);
+
+        $itemList = $invoiceData->InvoiceArticles();
+        $i = 0;
+        foreach($itemList as $item) {
+            $document->addNewPosition($i)
+                ->setDocumentPositionProductDetails($item->Title, $item->Description);
+
+            $document->setDocumentPositionQuantity($item->Quantity, $item->getUnitShortLabel());
+
+            //setDocumentPositionNetPrice(float $amount, ?float $basisQuantity = null, ?string $basisQuantityUnitCode = null)
+            $document->setDocumentPositionNetPrice((float)$item->SellPriceNetto);
+
+            $document->addDocumentPositionTax("S", "VAT", $config->InvoiceTax);
+
+            //$document->setDocumentPositionLineSummation((float)$item->getBruttoPrice());
+
+            /**
+             * Set information on item totals (with support for EXTENDED profile).
+             *
+             * @param  float $lineTotalAmount            __BT-131, From BASIC__ The total amount of the invoice item
+             * @param  float $chargeTotalAmount          __BT-X-327, From EXTENDED__ Total amount of item surcharges
+             * @param  float $allowanceTotalAmount       __BT-X-328, From EXTENDED__ Total amount of item discounts
+             * @param  float $taxTotalAmount             __BT-X-329, From EXTENDED__ Total amount of item taxes
+             * @param  float $grandTotalAmount           __BT-X-330, From EXTENDED__ Total gross amount of the item
+             * @param  float $totalAllowanceChargeAmount __BT-X-98, From EXTENDED__ Total amount of item surcharges and discounts
+             * @return ZugferdDocumentBuilder
+             */
+            $document->setDocumentPositionLineSummationExt((float) $item->SellPriceNetto, null, (float) $item->getDiscountAmount(), (float) $item->getTaxAmount(), (float)$item->getBruttoPrice(), (float) $item->getDiscountAmount());
+
+            $i++;
+        }
+
+        return $document;
+    }
+
     public function getPDF() {
         $controller = Controller::curr();
         $html = $controller->customise(['Invoice' => $this])->renderWith('app/Pages/Layout/PDF/Invoice');
         $filename = "rechnung-".$this->ID.".pdf";
         $pdfPath = $controller->generatePDF($html, $filename);
+
+
+        // need some check if the XML is generated correctly !!!
+        //$pdfMerger = new ZugferdDocumentPdfMerger($this->generateEInvoiceXML(), $pdfPath);
+        //$pdfMerger->generateDocument()
+        //    ->saveDocument($pdfPath);
 
         $controller->getResponse()->addHeader('Content-Type', 'application/pdf');
         $controller->getResponse()->addHeader('Content-Disposition', 'inline; filename="'.$filename.'"');

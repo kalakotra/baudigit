@@ -274,6 +274,10 @@ class OfferPageController extends \PageController
                 $article = OfferArticle::create();
                 $form->saveInto($article);
                 $article->OfferID = $offer->ID;
+
+                $config = SiteConfig::current_site_config();
+                $article->TaxRate = $config->InvoiceTax;
+                
                 $article->write();
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich hinzugefügt.');

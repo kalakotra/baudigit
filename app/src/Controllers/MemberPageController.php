@@ -88,14 +88,14 @@ class MemberPageController extends \PageController
     public function doAdd($data, $form) {
         // Check if passwords match
         if ($data['Password'] !== $data['PasswordConfirm']) {
-            $form->sessionMessage('Die Passwörter stimmen nicht überein.', 'bad');
+            $this->setNotifySessionData('bad', 'bi bi-exclamation-triangle', 'Die Passwörter stimmen nicht überein.');
             return $this->redirectBack();
         }
 
         // Check if email already exists
         $existingMember = Member::get()->filter('Email', $data['Email'])->first();
         if ($existingMember) {
-            $form->sessionMessage('Ein Benutzer mit dieser E-Mail-Adresse existiert bereits.', 'bad');
+            $this->setNotifySessionData('bad', 'bi bi-exclamation-triangle', 'Ein Benutzer mit dieser E-Mail-Adresse existiert bereits.');
             return $this->redirectBack();
         }
 
@@ -116,7 +116,7 @@ class MemberPageController extends \PageController
             }
         }
 
-        $form->sessionMessage('Benutzer erfolgreich erstellt.', 'good');
+        $this->setNotifySessionData('good', 'bi bi-check-circle', 'Benutzer erfolgreich erstellt.');
         return $this->redirect($this->Link('?e=' . $member->ID));
     }
 
@@ -170,14 +170,14 @@ class MemberPageController extends \PageController
         if ($member) {
             // Check if passwords match (if provided)
             if (!empty($data['Password']) && $data['Password'] !== $data['PasswordConfirm']) {
-                $form->sessionMessage('Die Passwörter stimmen nicht überein.', 'bad');
+                $this->setNotifySessionData('bad', 'bi bi-exclamation-triangle', 'Die Passwörter stimmen nicht überein.');
                 return $this->redirectBack();
             }
 
             // Check if email already exists (excluding current member)
             $existingMember = Member::get()->filter('Email', $data['Email'])->exclude('ID', $member->ID)->first();
             if ($existingMember) {
-                $form->sessionMessage('Ein anderer Benutzer mit dieser E-Mail-Adresse existiert bereits.', 'bad');
+                $this->setNotifySessionData('bad', 'bi bi-exclamation-triangle', 'Ein anderer Benutzer mit dieser E-Mail-Adresse existiert bereits.');
                 return $this->redirectBack();
             }
 
@@ -213,11 +213,11 @@ class MemberPageController extends \PageController
                 }
             }
 
-            $form->sessionMessage('Benutzer erfolgreich gespeichert.', 'good');
+            $this->setNotifySessionData('good', 'bi bi-check-circle', 'Benutzer erfolgreich gespeichert.');
             return $this->redirectBack();
         }
 
-        $form->sessionMessage('Fehler beim Speichern des Benutzers.', 'bad');
+        $this->setNotifySessionData('bad', 'bi bi-exclamation-triangle', 'Fehler beim Speichern des Benutzers.');
         return $this->redirectBack();
     }
 
