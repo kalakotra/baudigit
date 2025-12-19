@@ -100,7 +100,7 @@ class ClientPageController extends \PageController
         $form->saveInto($client);
         $client->write();
 
-        $form->sessionMessage('Kunde erfolgreich gespeichert.', 'good');
+        $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Kunde erfolgreich gespeichert.');
         return $this->redirect($this->Link('?e=' . $client->ID));
     }
 
@@ -145,7 +145,7 @@ class ClientPageController extends \PageController
                 $form->saveInto($client);
                 $client->write();
 
-                $form->sessionMessage('Kunde erfolgreich gespeichert.', 'good');
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Kunde erfolgreich gespeichert.');
                 return $this->redirectBack();
             }
         }
@@ -191,7 +191,7 @@ class ClientPageController extends \PageController
                 $form->saveInto($location);
                 $location->write();
 
-                $form->sessionMessage('Standort erfolgreich gespeichert.', 'good');
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Standort erfolgreich gespeichert.');
                 return $this->redirect($this->Link('?e=' . $clientID . '&el=' . $location->ID));
             }
         }
@@ -250,7 +250,7 @@ class ClientPageController extends \PageController
                     $form->saveInto($location);
                     $location->write();
 
-                    $form->sessionMessage('Standort erfolgreich gespeichert.', 'good');
+                    $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Standort erfolgreich gespeichert.');
                     return $this->redirectBack();
                 }
             }

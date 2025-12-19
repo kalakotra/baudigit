@@ -70,7 +70,6 @@ class ArticlePageController extends \PageController
         $required = RequiredFields::create([
             'Title',
             'Unit',
-            'BuyPriceNetto',
             'SellPriceNetto',
         ]);
 
@@ -85,7 +84,7 @@ class ArticlePageController extends \PageController
         $form->saveInto($article);
         $article->write();
 
-        $form->sessionMessage('Produkt erfolgreich hinzugefügt.', 'good');
+        $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich gespeichert.');
 
         return $this->redirectBack();
     }
@@ -115,7 +114,6 @@ class ArticlePageController extends \PageController
                 $required = RequiredFields::create([
                     'Title',
                     'Unit',
-                    'BuyPriceNetto',
                     'SellPriceNetto',
                 ]);
 
@@ -140,15 +138,15 @@ class ArticlePageController extends \PageController
                 $form->saveInto($article);
                 $article->write();
 
-                $form->sessionMessage('Produkt erfolgreich gespeichert.', 'good');
+                $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich gespeichert.');
 
                 return $this->redirectBack();
             } else {
-                $form->sessionMessage('Artikel nicht gefunden.', 'bad');
+                $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Artikel nicht gefunden.');
                 return $this->redirectBack();
             }
         } else {
-            $form->sessionMessage('Ungültige ID.', 'bad');
+            $this->setNotifySessionData('danger', 'bi bi-exclamation-triangle', 'Ungültige ID.');
             return $this->redirectBack();
         }
     }
