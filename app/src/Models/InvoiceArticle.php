@@ -4,12 +4,20 @@ namespace app\Models;
 
 use app\Models\Article;
 use app\Models\Invoice;
+use SilverStripe\ORM\DataObject;
 
-class InvoiceArticle extends Article
+class InvoiceArticle extends DataObject
 {
+    use ArticleItemTrait;
+
     private static $table_name = 'app_InvoiceArticle';
 
     private static $db = [
+        'InternalID' => 'Varchar(100)',
+        'Title' => 'Varchar(255)',
+        'Unit' => 'Int', // 0=Stück, 1=m, 2=m², 3=m³, 4=l, 5=kg, 6=Stunde, 7=Sonstige
+        'SellPriceNetto' => 'Decimal(19,2)',
+        'Description' => 'Text',
         'Quantity' => 'Decimal(10,2)', // quantity of the article
         'Discount' => 'Decimal(10,2)', // discount in percent
         'TaxRate' => 'Decimal(10,2)', // tax rate in percent
