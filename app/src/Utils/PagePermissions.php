@@ -94,7 +94,7 @@ trait PagePermissions
     }
 
     public function getCapitalizedClassName(){
-        $className = __CLASS__;
+        $className = static::class;
 
         // get ClassName without namespace (only the last part)
         $classNameParts = explode("\\", $className);

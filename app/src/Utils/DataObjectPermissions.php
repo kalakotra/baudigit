@@ -70,7 +70,7 @@ trait DataObjectPermissions
     }
 
     public function getCapitalizedClassName(){
-        $className = __CLASS__;
+        $className = static::class;
         $classNameArray = explode("\\", $className);
         $classNameWithoutNamespace = $classNameArray[count($classNameArray)-1];
         $classNameWithoutNamespace = strtoupper($classNameWithoutNamespace);
