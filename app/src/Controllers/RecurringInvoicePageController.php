@@ -37,7 +37,8 @@ class RecurringInvoicePageController extends \PageController
         'changeInvoiceStatus'
     ];
 
-    public function readAllInputs() {
+    public function readAllInputs()
+    {
         // if ShowOnlyStatus filter is set, filter offers by status
         $showOnlyStatus = $this->data()->ShowOnlyStatus;
         $statusValue = $this->data()->StatusValue;
@@ -47,11 +48,13 @@ class RecurringInvoicePageController extends \PageController
         return RecurringInvoice::get();
     }
 
-    public function getAllArticles() {
+    public function getAllArticles()
+    {
         return Article::get();
     }
 
-    public function actOffer() {
+    public function actOffer()
+    {
         $id = $this->checkEdit();
         if ($id && is_numeric($id)) {
             $offer = RecurringInvoice::get()->byID($id);
@@ -63,7 +66,8 @@ class RecurringInvoicePageController extends \PageController
         return false;
     }
 
-    public function changeInvoiceStatus() {
+    public function changeInvoiceStatus()
+    {
         $id = $this->checkEdit();
         $newStatus = $this->getRequest()->getVar('status');
 
@@ -82,23 +86,51 @@ class RecurringInvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function checkEditArticle() {
+    public function checkEditArticle()
+    {
         if ($this->getRequest()->getVar('ea')) {
             return $this->getRequest()->getVar('ea');
-        } else if ($this->getRequest()->postVar('ea')) {
+        } elseif ($this->getRequest()->postVar('ea')) {
             return $this->getRequest()->postVar('ea');
         }
         return false;
     }
 
-    public function add() {
+    public function add()
+    {
         
         $allCLients = Client::get()->map('ID', 'Company')->toArray();
         $clientGroupedList = [];
-        foreach ($allCLients as $id => $company) {
-            $clientObjects = ClientObject::get()->filter('ClientID', $id);
-            if ($clientObjects->count() > 0) {
-                $clientGroupedList[$company] = $clientObjects->map('ID', 'getFullName')->toArray();
+
+        if (!empty($allCLients)) {
+            $clientIDs = array_keys($allCLients);
+
+            $clients = Client::get()->filter('ID', $clientIDs);
+            $clientsMap = [];
+            foreach ($clients as $client) {
+                $clientsMap[$client->ID] = $client;
+            }
+
+            $allClientObjects = ClientObject::get()->filter('ClientID', $clientIDs);
+            $clientObjectsByClient = [];
+
+            foreach ($allClientObjects as $clientObject) {
+                if (isset($clientsMap[$clientObject->ClientID])) {
+                    $clientObject->setComponent('Client', $clientsMap[$clientObject->ClientID]);
+                }
+                $clientObjectsByClient[$clientObject->ClientID][] = $clientObject;
+            }
+
+            foreach ($allCLients as $id => $company) {
+                if (isset($clientObjectsByClient[$id])) {
+                    $mapped = [];
+                    foreach ($clientObjectsByClient[$id] as $obj) {
+                        $mapped[$obj->ID] = $obj->getFullName();
+                    }
+                    if (!empty($mapped)) {
+                        $clientGroupedList[$company] = $mapped;
+                    }
+                }
             }
         }
 
@@ -133,7 +165,8 @@ class RecurringInvoicePageController extends \PageController
         return $form;
     }
 
-    public function doAdd($data, $form) {
+    public function doAdd($data, $form)
+    {
         $offer = new RecurringInvoice();
         $form->saveInto($offer);
         $offer->write();
@@ -143,7 +176,8 @@ class RecurringInvoicePageController extends \PageController
         return $this->redirect($this->Link('?e=' . $offer->ID));
     }
 
-    public function edit() {
+    public function edit()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             $addForm = $this->add();
@@ -168,7 +202,8 @@ class RecurringInvoicePageController extends \PageController
         }
     }
 
-    public function doEdit($data, $form) {
+    public function doEdit($data, $form)
+    {
         $offer = $this->actOffer();
         if ($offer) {
             $form->saveInto($offer);
@@ -183,7 +218,8 @@ class RecurringInvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function getAllOfferArticles() {
+    public function getAllOfferArticles()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             return $offer->Articles();
@@ -192,12 +228,13 @@ class RecurringInvoicePageController extends \PageController
         return false;
     }
 
-    public function deleteArticle() {
+    public function deleteArticle()
+    {
         $id = $this->checkEdit();
         $da = null;
         if ($this->getRequest()->getVar('da')) {
             $da = $this->getRequest()->getVar('da');
-        } else if ($this->getRequest()->postVar('da')) {
+        } elseif ($this->getRequest()->postVar('da')) {
             $da = $this->getRequest()->postVar('da');
         }
 
@@ -216,7 +253,8 @@ class RecurringInvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function addArticleForm() {
+    public function addArticleForm()
+    {
         $allArticles = Article::get();
         $config = SiteConfig::current_site_config();
 
@@ -225,7 +263,6 @@ class RecurringInvoicePageController extends \PageController
             NumericField::create('Quantity', 'Menge', 1)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setAttribute('type', 'number')->setAttribute('min', '1')->setAttribute('step', '1')->setValue(1),
             NumericField::create('Discount', 'Rabatt (%)', '0')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setScale(2),
             HiddenField::create('e', 'Angebot')->setValue($this->checkEdit()),
-
             TextField::create('Title', 'Titel')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setAttribute('list', 'articleList')->setAttribute('autocomplete', 'off'),
             DropdownField::create('Unit', '', Article::singleton()->getUnitOptions())->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select'),
             HiddenField::create('BuyPriceNetto', 'Einkaufspreis netto')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
@@ -234,7 +271,6 @@ class RecurringInvoicePageController extends \PageController
             //NumericField::create('SellPriceBrutto', 'Preis')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             NumericField::create('TaxRate', 'MwSt. (%)', $config->InvoiceTax)->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true),
             TextareaField::create('Description', 'Beschreibung')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setRows(2),
-            
             HiddenField::create('SourceArticleID'),
             NumericField::create('FinalPrice', 'Betrag', '0,00')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true)
         );
@@ -255,7 +291,8 @@ class RecurringInvoicePageController extends \PageController
         return $form;
     }
 
-    public function doAddArticle($data, $form) {
+    public function doAddArticle($data, $form)
+    {
         $id = $this->checkEdit();
         if ($id && is_numeric($id)) {
             $offer = RecurringInvoice::get()->byID($id);
@@ -274,7 +311,8 @@ class RecurringInvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function editArticleForm() {
+    public function editArticleForm()
+    {
         $id = $this->checkEditArticle();
         if ($id && is_numeric($id)) {
             $offerArticle = RecurringInvoiceArticle::get()->byID($id);
@@ -304,7 +342,8 @@ class RecurringInvoicePageController extends \PageController
         }
     }
 
-    public function doEditArticle($data, $form) {
+    public function doEditArticle($data, $form)
+    {
         $id = $this->checkEditArticle();
         if ($id && is_numeric($id)) {
             $offerArticle = RecurringInvoiceArticle::get()->byID($id);
@@ -321,7 +360,8 @@ class RecurringInvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function previewPDF() {
+    public function previewPDF()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             return $offer->getPDF();
@@ -329,7 +369,8 @@ class RecurringInvoicePageController extends \PageController
         return false;
     }
 
-    public function send() {
+    public function send()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             if ($offer->sendOfferEmail()) {
@@ -343,14 +384,16 @@ class RecurringInvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function getSentStatus() {
+    public function getSentStatus()
+    {
         if ($this->getRequest()->getVar('sent')) {
             return $sent = $this->getRequest()->getVar('sent');
         }
         return null;
     }
 
-    public function toInvoice() {
+    public function toInvoice()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             // Create new invoice
