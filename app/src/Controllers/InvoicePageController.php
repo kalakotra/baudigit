@@ -40,7 +40,8 @@ class InvoicePageController extends \PageController
         'changeInvoiceStatus'
     ];
 
-    public function readAllInputs() {
+    public function readAllInputs()
+    {
         $showOnlyStatus = $this->data()->ShowOnlyStatus;
         $statusValue = $this->data()->StatusValue;
         if ($showOnlyStatus) {
@@ -49,11 +50,13 @@ class InvoicePageController extends \PageController
         return Invoice::get();
     }
 
-    public function getAllArticles() {
+    public function getAllArticles()
+    {
         return Article::get();
     }
 
-    public function actInvoice() {
+    public function actInvoice()
+    {
         $id = $this->checkEdit();
         if ($id && is_numeric($id)) {
             $invoice = Invoice::get()->byID($id);
@@ -65,16 +68,18 @@ class InvoicePageController extends \PageController
         return false;
     }
 
-    public function checkEditArticle() {
+    public function checkEditArticle()
+    {
         if ($this->getRequest()->getVar('ea')) {
             return $this->getRequest()->getVar('ea');
-        } else if ($this->getRequest()->postVar('ea')) {
+        } elseif ($this->getRequest()->postVar('ea')) {
             return $this->getRequest()->postVar('ea');
         }
         return false;
     }
 
-    public function changeInvoiceStatus() {
+    public function changeInvoiceStatus()
+    {
         $id = $this->checkEdit();
         $newStatus = $this->getRequest()->getVar('status');
 
@@ -93,16 +98,43 @@ class InvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function add() {
+    public function add()
+    {
         // get last invoice to suggest next invoice number, format YYYY-0001
         $lastInvoice = Invoice::get()->sort('Created', 'DESC')->first();
         $nextInvoiceNumber = $lastInvoice ? $lastInvoice->getNextInvoiceNumber() : date('Y') . '-0001';
         $allCLients = Client::get()->map('ID', 'Company')->toArray();
         $clientGroupedList = [];
-        foreach ($allCLients as $id => $company) {
-            $clientObjects = ClientObject::get()->filter('ClientID', $id);
-            if ($clientObjects->count() > 0) {
-                $clientGroupedList[$company] = $clientObjects->map('ID', 'getFullName')->toArray();
+
+        if (!empty($allCLients)) {
+            $clientIDs = array_keys($allCLients);
+
+            $clients = Client::get()->filter('ID', $clientIDs);
+            $clientsMap = [];
+            foreach ($clients as $client) {
+                $clientsMap[$client->ID] = $client;
+            }
+
+            $allClientObjects = ClientObject::get()->filter('ClientID', $clientIDs);
+            $clientObjectsByClient = [];
+
+            foreach ($allClientObjects as $clientObject) {
+                if (isset($clientsMap[$clientObject->ClientID])) {
+                    $clientObject->setComponent('Client', $clientsMap[$clientObject->ClientID]);
+                }
+                $clientObjectsByClient[$clientObject->ClientID][] = $clientObject;
+            }
+
+            foreach ($allCLients as $id => $company) {
+                if (isset($clientObjectsByClient[$id])) {
+                    $mapped = [];
+                    foreach ($clientObjectsByClient[$id] as $obj) {
+                        $mapped[$obj->ID] = $obj->getFullName();
+                    }
+                    if (!empty($mapped)) {
+                        $clientGroupedList[$company] = $mapped;
+                    }
+                }
             }
         }
 
@@ -132,7 +164,7 @@ class InvoicePageController extends \PageController
             $projectID = $this->getRequest()->getVar('p');
             if ($project = Project::get()->byID($projectID)) {
                 // set clientobjectid from project
-                $formFields->dataFieldByName('ClientObjectID')->setValue($project->ClientObjectID);                
+                $formFields->dataFieldByName('ClientObjectID')->setValue($project->ClientObjectID);
 
                 if ($project->OfferID) {
                     // set offer if project has one
@@ -140,7 +172,7 @@ class InvoicePageController extends \PageController
                         HiddenField::create('OfferID', 'Angebot')->setValue($project->OfferID)
                     );
                 }
-            }   
+            }
             $formFields->push(
                 HiddenField::create('ProjectID', 'Projekt')->setValue($projectID)
             );
@@ -155,7 +187,8 @@ class InvoicePageController extends \PageController
         return $form;
     }
 
-    public function doAdd($data, $form) {
+    public function doAdd($data, $form)
+    {
         $invoice = new Invoice();
         $form->saveInto($invoice);
         $invoice->write();
@@ -175,7 +208,8 @@ class InvoicePageController extends \PageController
         return $this->redirect($this->Link('?e=' . $invoice->ID));
     }
 
-    public function edit() {
+    public function edit()
+    {
         $invoice = $this->actInvoice();
         if ($invoice) {
             $addForm = $this->add();
@@ -218,7 +252,8 @@ class InvoicePageController extends \PageController
         }
     }
 
-    public function doEdit($data, $form) {
+    public function doEdit($data, $form)
+    {
         $invoice = $this->actInvoice();
         if ($invoice) {
             $form->saveInto($invoice);
@@ -232,7 +267,8 @@ class InvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function getAllInvoiceArticles() {
+    public function getAllInvoiceArticles()
+    {
         $invoice = $this->actInvoice();
         if ($invoice) {
             return $invoice->InvoiceArticles();
@@ -241,12 +277,13 @@ class InvoicePageController extends \PageController
         return false;
     }
 
-    public function deleteArticle() {
+    public function deleteArticle()
+    {
         $id = $this->checkEdit();
         $da = null;
         if ($this->getRequest()->getVar('da')) {
             $da = $this->getRequest()->getVar('da');
-        } else if ($this->getRequest()->postVar('da')) {
+        } elseif ($this->getRequest()->postVar('da')) {
             $da = $this->getRequest()->postVar('da');
         }
 
@@ -265,7 +302,8 @@ class InvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function addArticleForm() {
+    public function addArticleForm()
+    {
         $allArticles = Article::get();
         $config = SiteConfig::current_site_config();
 
@@ -274,7 +312,6 @@ class InvoicePageController extends \PageController
             NumericField::create('Quantity', 'Menge', 1)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setAttribute('type', 'number')->setAttribute('min', '1')->setAttribute('step', '1')->setValue(1),
             NumericField::create('Discount', 'Rabatt (%)', '0')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setScale(2),
             HiddenField::create('e', 'Rechnung')->setValue($this->checkEdit()),
-
             TextField::create('Title', 'Titel')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setAttribute('list', 'articleList')->setAttribute('autocomplete', 'off'),
             DropdownField::create('Unit', '', Article::singleton()->getUnitOptions())->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select'),
             HiddenField::create('BuyPriceNetto', 'Einkaufspreis netto')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
@@ -283,7 +320,6 @@ class InvoicePageController extends \PageController
             //NumericField::create('SellPriceBrutto', 'Preis')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             NumericField::create('TaxRate', 'MwSt. (%)', $config->InvoiceTax)->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true),
             TextareaField::create('Description', 'Beschreibung')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setRows(2),
-            
             HiddenField::create('SourceArticleID'),
             NumericField::create('FinalPrice', 'Betrag', '0,00')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true)
         );
@@ -305,7 +341,8 @@ class InvoicePageController extends \PageController
         return $form;
     }
 
-    public function doAddArticle($data, $form) {
+    public function doAddArticle($data, $form)
+    {
         $id = $this->checkEdit();
         if ($id && is_numeric($id)) {
             $invoice = Invoice::get()->byID($id);
@@ -327,7 +364,8 @@ class InvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function editArticleForm() {
+    public function editArticleForm()
+    {
         $id = $this->checkEditArticle();
         if ($id && is_numeric($id)) {
             $invoiceArticle = InvoiceArticle::get()->byID($id);
@@ -358,7 +396,8 @@ class InvoicePageController extends \PageController
         }
     }
 
-    public function doEditArticle($data, $form) {
+    public function doEditArticle($data, $form)
+    {
         $id = $this->checkEditArticle();
         if ($id && is_numeric($id)) {
             $invoiceArticle = InvoiceArticle::get()->byID($id);
@@ -374,7 +413,8 @@ class InvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function previewPDF() {
+    public function previewPDF()
+    {
         $invoice = $this->actInvoice();
         if ($invoice) {
             return $invoice->getPDF();
@@ -382,7 +422,8 @@ class InvoicePageController extends \PageController
         return false;
     }
 
-    public function send() {
+    public function send()
+    {
         $invoice = $this->actInvoice();
         if ($invoice) {
             if ($invoice->sendInvoiceEmail()) {
@@ -396,7 +437,8 @@ class InvoicePageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function getSentStatus() {
+    public function getSentStatus()
+    {
         if ($this->getRequest()->getVar('sent')) {
             return $sent = $this->getRequest()->getVar('sent');
         }
@@ -404,11 +446,11 @@ class InvoicePageController extends \PageController
     }
 
 
-    public function offerToInvoice($offerID, $invoiceID) {
+    public function offerToInvoice($offerID, $invoiceID)
+    {
         $offer = Offer::get()->byID($offerID);
         $invoice = Invoice::get()->byID($invoiceID);
         if ($offer && $invoice) {
-
             // Copy all offer articles to invoice articles
             $offerArticles = $offer->OfferArticles();
             foreach ($offerArticles as $offerArticle) {
@@ -430,7 +472,8 @@ class InvoicePageController extends \PageController
 
 
     // cancellation of invoice. Set status to cancelled (3) and add new negative invoice
-    public function cancellation() {
+    public function cancellation()
+    {
         $invoice = $this->actInvoice();
         if ($invoice) {
             // set status to cancelled

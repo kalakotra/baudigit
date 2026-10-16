@@ -41,7 +41,8 @@ class OfferPageController extends \PageController
     ];
 
     // check if there is a project part in system
-    public function checkProjectModule() {
+    public function checkProjectModule()
+    {
         $projectPage = ProjectPage::get();
         if ($projectPage->exists()) {
             return true;
@@ -49,7 +50,8 @@ class OfferPageController extends \PageController
         return false;
     }
 
-    public function readAllInputs() {
+    public function readAllInputs()
+    {
         // if ShowOnlyStatus filter is set, filter offers by status
         $showOnlyStatus = $this->data()->ShowOnlyStatus;
         $statusValue = $this->data()->StatusValue;
@@ -59,11 +61,13 @@ class OfferPageController extends \PageController
         return Offer::get();
     }
 
-    public function getAllArticles() {
+    public function getAllArticles()
+    {
         return Article::get();
     }
 
-    public function actOffer() {
+    public function actOffer()
+    {
         $id = $this->checkEdit();
         if ($id && is_numeric($id)) {
             $offer = Offer::get()->byID($id);
@@ -75,22 +79,24 @@ class OfferPageController extends \PageController
         return false;
     }
 
-    public function checkEditArticle() {
+    public function checkEditArticle()
+    {
         if ($this->getRequest()->getVar('ea')) {
             return $this->getRequest()->getVar('ea');
-        } else if ($this->getRequest()->postVar('ea')) {
+        } elseif ($this->getRequest()->postVar('ea')) {
             return $this->getRequest()->postVar('ea');
         }
         return false;
     }
 
-    public function changeOfferStatus() {
+    public function changeOfferStatus()
+    {
         $id = $this->checkEdit();
         $newStatus = $this->getRequest()->getVar('status');
 
         if ($id && is_numeric($id) && is_numeric($newStatus)) {
             $offer = Offer::get()->byID($id);
-            if ($offer) { 
+            if ($offer) {
                 $offer->Status = intval($newStatus);
                 $offer->write();
 
@@ -103,16 +109,43 @@ class OfferPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function add() {
+    public function add()
+    {
         // get last offer to suggest next offer number, format YYYY-0001
         $lastOffer = Offer::get()->sort('Created', 'DESC')->first();
         $nextOfferNumber = $lastOffer ? $lastOffer->getNextOfferNumber() : date('Y') . '-0001';
         $allCLients = Client::get()->map('ID', 'Company')->toArray();
         $clientGroupedList = [];
-        foreach ($allCLients as $id => $company) {
-            $clientObjects = ClientObject::get()->filter('ClientID', $id);
-            if ($clientObjects->count() > 0) {
-                $clientGroupedList[$company] = $clientObjects->map('ID', 'getFullName')->toArray();
+
+        if (!empty($allCLients)) {
+            $clientIDs = array_keys($allCLients);
+
+            $clients = Client::get()->filter('ID', $clientIDs);
+            $clientsMap = [];
+            foreach ($clients as $client) {
+                $clientsMap[$client->ID] = $client;
+            }
+
+            $allClientObjects = ClientObject::get()->filter('ClientID', $clientIDs);
+            $clientObjectsByClient = [];
+
+            foreach ($allClientObjects as $clientObject) {
+                if (isset($clientsMap[$clientObject->ClientID])) {
+                    $clientObject->setComponent('Client', $clientsMap[$clientObject->ClientID]);
+                }
+                $clientObjectsByClient[$clientObject->ClientID][] = $clientObject;
+            }
+
+            foreach ($allCLients as $id => $company) {
+                if (isset($clientObjectsByClient[$id])) {
+                    $mapped = [];
+                    foreach ($clientObjectsByClient[$id] as $obj) {
+                        $mapped[$obj->ID] = $obj->getFullName();
+                    }
+                    if (!empty($mapped)) {
+                        $clientGroupedList[$company] = $mapped;
+                    }
+                }
             }
         }
 
@@ -142,7 +175,8 @@ class OfferPageController extends \PageController
         return $form;
     }
 
-    public function doAdd($data, $form) {
+    public function doAdd($data, $form)
+    {
         $offer = new Offer();
         $form->saveInto($offer);
         $offer->write();
@@ -152,7 +186,8 @@ class OfferPageController extends \PageController
         return $this->redirect($this->Link('?e=' . $offer->ID));
     }
 
-    public function edit() {
+    public function edit()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             $addForm = $this->add();
@@ -178,7 +213,8 @@ class OfferPageController extends \PageController
         }
     }
 
-    public function doEdit($data, $form) {
+    public function doEdit($data, $form)
+    {
         $offer = $this->actOffer();
         if ($offer) {
             $form->saveInto($offer);
@@ -193,7 +229,8 @@ class OfferPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function getAllOfferArticles() {
+    public function getAllOfferArticles()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             return $offer->OfferArticles();
@@ -202,12 +239,13 @@ class OfferPageController extends \PageController
         return false;
     }
 
-    public function deleteArticle() {
+    public function deleteArticle()
+    {
         $id = $this->checkEdit();
         $da = null;
         if ($this->getRequest()->getVar('da')) {
             $da = $this->getRequest()->getVar('da');
-        } else if ($this->getRequest()->postVar('da')) {
+        } elseif ($this->getRequest()->postVar('da')) {
             $da = $this->getRequest()->postVar('da');
         }
 
@@ -226,7 +264,8 @@ class OfferPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function addArticleForm() {
+    public function addArticleForm()
+    {
         $allArticles = Article::get();
         $config = SiteConfig::current_site_config();
 
@@ -235,7 +274,6 @@ class OfferPageController extends \PageController
             NumericField::create('Quantity', 'Menge', 1)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setAttribute('type', 'number')->setAttribute('min', '1')->setAttribute('step', '1')->setValue(1),
             NumericField::create('Discount', 'Rabatt (%)', '0')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setScale(2),
             HiddenField::create('e', 'Angebot')->setValue($this->checkEdit()),
-
             TextField::create('Title', 'Titel')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setAttribute('list', 'articleList')->setAttribute('autocomplete', 'off'),
             DropdownField::create('Unit', '', Article::singleton()->getUnitOptions())->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select'),
             HiddenField::create('BuyPriceNetto', 'Einkaufspreis netto')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
@@ -244,7 +282,6 @@ class OfferPageController extends \PageController
             //NumericField::create('SellPriceBrutto', 'Preis')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             NumericField::create('TaxRate', 'MwSt. (%)', $config->InvoiceTax)->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true),
             TextareaField::create('Description', 'Beschreibung')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setRows(2),
-            
             HiddenField::create('SourceArticleID'),
             NumericField::create('FinalPrice', 'Betrag', '0,00')->setScale(2)->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')->setReadonly(true)
         );
@@ -266,7 +303,8 @@ class OfferPageController extends \PageController
         return $form;
     }
 
-    public function doAddArticle($data, $form) {
+    public function doAddArticle($data, $form)
+    {
         $id = $this->checkEdit();
         if ($id && is_numeric($id)) {
             $offer = Offer::get()->byID($id);
@@ -289,7 +327,8 @@ class OfferPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function editArticleForm() {
+    public function editArticleForm()
+    {
         $id = $this->checkEditArticle();
         if ($id && is_numeric($id)) {
             $offerArticle = OfferArticle::get()->byID($id);
@@ -320,7 +359,8 @@ class OfferPageController extends \PageController
         }
     }
 
-    public function doEditArticle($data, $form) {
+    public function doEditArticle($data, $form)
+    {
         $id = $this->checkEditArticle();
         if ($id && is_numeric($id)) {
             $offerArticle = OfferArticle::get()->byID($id);
@@ -337,7 +377,8 @@ class OfferPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function previewPDF() {
+    public function previewPDF()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             return $offer->getPDF();
@@ -345,7 +386,8 @@ class OfferPageController extends \PageController
         return false;
     }
 
-    public function send() {
+    public function send()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             if ($offer->sendOfferEmail()) {
@@ -359,14 +401,16 @@ class OfferPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function getSentStatus() {
+    public function getSentStatus()
+    {
         if ($this->getRequest()->getVar('sent')) {
             return $sent = $this->getRequest()->getVar('sent');
         }
         return null;
     }
 
-    public function toInvoice() {
+    public function toInvoice()
+    {
         $offer = $this->actOffer();
         if ($offer) {
             // Create new invoice
