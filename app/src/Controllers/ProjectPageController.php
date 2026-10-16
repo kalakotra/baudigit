@@ -50,7 +50,8 @@ class ProjectPageController extends \PageController
         'changeProjectStatus'
     ];
 
-    public function readAllInputs() {
+    public function readAllInputs()
+    {
         $showOnlyStatus = $this->data()->ShowOnlyStatus;
         $statusValue = $this->data()->StatusValue;
         if ($showOnlyStatus) {
@@ -59,17 +60,19 @@ class ProjectPageController extends \PageController
         return Project::get();
     }
 
-    public function checkActiveAccordion() {
+    public function checkActiveAccordion()
+    {
         if ($this->checkEditDocument()) {
             return 'documents';
-        } else if ($this->checkEditMember()) {
+        } elseif ($this->checkEditMember()) {
             return 'members';
         } else {
             return 'details';
         }
     }
 
-    public function actProject() {
+    public function actProject()
+    {
         $id = $this->checkEdit();
         if ($id && is_numeric($id)) {
             $project = Project::get()->byID($id);
@@ -81,7 +84,8 @@ class ProjectPageController extends \PageController
         return false;
     }
 
-    public function changeProjectStatus() {
+    public function changeProjectStatus()
+    {
         $project = $this->actProject();
         if ($project) {
             $newStatus = $this->getRequest()->getVar('status');
@@ -99,7 +103,8 @@ class ProjectPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function add() {
+    public function add()
+    {
         $allClients = Client::get()->map('ID', 'Company')->toArray();
         $clientGroupedList = [];
         foreach ($allClients as $id => $company) {
@@ -144,13 +149,13 @@ class ProjectPageController extends \PageController
             $action->push(
                 LiteralField::create('cancel', '<a href="javascript:history.back()" class="btn btn-sm btn-secondary px-4 mb-2 ms-2">Abbrechen</a>')
             );
-            
         }
 
         return $form;
     }
 
-    public function doAdd($data, $form) {
+    public function doAdd($data, $form)
+    {
         $project = new Project();
         $form->saveInto($project);
         
@@ -170,7 +175,8 @@ class ProjectPageController extends \PageController
         return $this->redirect($this->Link('?e=' . $project->ID));
     }
 
-    public function edit() {
+    public function edit()
+    {
         $project = $this->actProject();
         if ($project) {
             $addForm = $this->add();
@@ -201,7 +207,8 @@ class ProjectPageController extends \PageController
         }
     }
 
-    public function doEdit($data, $form) {
+    public function doEdit($data, $form)
+    {
         $project = $this->actProject();
         //if ($project && !in_array($project->Status, [0, 1, 2, 3, 4])) {
             $form->saveInto($project);
@@ -215,7 +222,8 @@ class ProjectPageController extends \PageController
         //return $this->redirectBack();
     }
 
-    public function getAllProjectMembers() {
+    public function getAllProjectMembers()
+    {
         $project = $this->actProject();
         if ($project) {
             //return $project->ProjectMembers();
@@ -224,16 +232,18 @@ class ProjectPageController extends \PageController
         return false;
     }
 
-    public function checkEditMember() {
+    public function checkEditMember()
+    {
         if ($this->getRequest()->getVar('em')) {
             return $this->getRequest()->getVar('em');
-        } else if ($this->getRequest()->postVar('em')) {
+        } elseif ($this->getRequest()->postVar('em')) {
             return $this->getRequest()->postVar('em');
         }
         return false;
     }
 
-    public function addMemberForm() {
+    public function addMemberForm()
+    {
         $project = $this->actProject();
         if (!$project) {
             return false;
@@ -267,7 +277,8 @@ class ProjectPageController extends \PageController
         return $form;
     }
 
-    public function doAddMember($data, $form) {
+    public function doAddMember($data, $form)
+    {
         $project = $this->actProject();
         if ($project) {
             $projectMember = new ProjectMember();
@@ -293,7 +304,8 @@ class ProjectPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function editMemberForm() {
+    public function editMemberForm()
+    {
         $id = $this->checkEditMember();
         if ($id && is_numeric($id)) {
             $projectMember = ProjectMember::get()->byID($id);
@@ -325,7 +337,8 @@ class ProjectPageController extends \PageController
         }
     }
 
-    public function doEditMember($data, $form) {
+    public function doEditMember($data, $form)
+    {
         $id = $this->checkEditMember();
         if ($id && is_numeric($id)) {
             $projectMember = ProjectMember::get()->byID($id);
@@ -352,12 +365,13 @@ class ProjectPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function deleteMember() {
+    public function deleteMember()
+    {
         $projectId = $this->checkEdit();
         $memberId = null;
         if ($this->getRequest()->getVar('dm')) {
             $memberId = $this->getRequest()->getVar('dm');
-        } else if ($this->getRequest()->postVar('dm')) {
+        } elseif ($this->getRequest()->postVar('dm')) {
             $memberId = $this->getRequest()->postVar('dm');
         }
 
@@ -378,7 +392,8 @@ class ProjectPageController extends \PageController
 
     // ProjectDocument management methods
 
-    public function getAllProjectDocuments() {
+    public function getAllProjectDocuments()
+    {
         $project = $this->actProject();
         if ($project) {
             return $project->ProjectDocuments();
@@ -387,16 +402,18 @@ class ProjectPageController extends \PageController
         return false;
     }
 
-    public function checkEditDocument() {
+    public function checkEditDocument()
+    {
         if ($this->getRequest()->getVar('ed')) {
             return $this->getRequest()->getVar('ed');
-        } else if ($this->getRequest()->postVar('ed')) {
+        } elseif ($this->getRequest()->postVar('ed')) {
             return $this->getRequest()->postVar('ed');
         }
         return false;
     }
 
-    public function uploadDocuments() {
+    public function uploadDocuments()
+    {
         $project = $this->actProject();
         if (!$project) {
             return false;
@@ -404,8 +421,11 @@ class ProjectPageController extends \PageController
 
         $formFields = FieldList::create(
             HiddenField::create('e', 'Projekt')->setValue($this->checkEdit()),
-            DropdownField::create('Category', 'Dokumenten-Kategorie', 
-                ProjectDocumentCategory::get()->map('ID', 'Name'))->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')->setEmptyString('-- bitte wählen --'),
+            DropdownField::create(
+                'Category',
+                'Dokumenten-Kategorie',
+                ProjectDocumentCategory::get()->map('ID', 'Name')
+            )->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')->setEmptyString('-- bitte wählen --'),
         );
 
         $uploadFolder = $project->getUploadFolders()['doc'];
@@ -414,7 +434,7 @@ class ProjectPageController extends \PageController
                 ->setFolderName($uploadFolder)
                 ->setAttribute('multiple', true)
                 ->addExtraClass('form-upload')
-                //->setAttribute('accept', '.xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf')
+            //->setAttribute('accept', '.xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf')
         );
 
         $action = FieldList::create(
@@ -431,11 +451,11 @@ class ProjectPageController extends \PageController
         return $form;
     }
 
-    public function doUploadDocuments($data, $form) {
+    public function doUploadDocuments($data, $form)
+    {
         $project = $this->actProject();
         if ($project) {
             if (isset($data['Documents']) && is_array($data['Documents'])) {
-
                 $documentsFolder = $project->getUploadFolders()['doc'];
 
                 $keys = array_keys($data['Documents']);
@@ -469,15 +489,19 @@ class ProjectPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function addDocumentForm() {
+    public function addDocumentForm()
+    {
         $project = $this->actProject();
         if (!$project) {
             return false;
         }
 
         $formFields = FieldList::create(
-            DropdownField::create('ProjectDocumentCategoryID', 'Dokumenten-Kategorie', 
-                ProjectDocumentCategory::get()->map('ID', 'Name'))->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')->setEmptyString('-- bitte wählen --'),
+            DropdownField::create(
+                'ProjectDocumentCategoryID',
+                'Dokumenten-Kategorie',
+                ProjectDocumentCategory::get()->map('ID', 'Name')
+            )->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-select')->setEmptyString('-- bitte wählen --'),
             TextField::create('Title', 'Dokumentationstitel')->setFieldHolderTemplate('FormField_customholder')->addExtraClass('form-control'),
             CheckboxField::create('VisibleToWorker', 'Sichtbar für Arbeiter')->setFieldHolderTemplate('FormField_customholder')->setValue(true),
             HiddenField::create('e', 'Projekt')->setValue($this->checkEdit())
@@ -489,7 +513,7 @@ class ProjectPageController extends \PageController
                 ->setFolderName($uploadFolder)
                 ->setAttribute('multiple', true)
                 ->addExtraClass('form-upload')
-                //->setAttribute('accept', '.xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf')
+            //->setAttribute('accept', '.xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf')
         );
 
         $action = FieldList::create(
@@ -506,9 +530,8 @@ class ProjectPageController extends \PageController
         return $form;
     }
 
-    public function doAddDocument($data, $form) {
-        print_r($data);
-        die();
+    public function doAddDocument($data, $form)
+    {
         $project = $this->actProject();
         if ($project) {
             $projectDocument = new ProjectDocument();
@@ -518,7 +541,6 @@ class ProjectPageController extends \PageController
             $projectDocument->write();
 
             if (isset($data['Documents']) && is_array($data['Documents'])) {
-
                 $keys = array_keys($data['Documents']);
                 $file_count = count($data['Documents']['name']);
                 for ($i = 0; $i < $file_count; $i++) {
@@ -551,7 +573,8 @@ class ProjectPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function editDocumentForm() {
+    public function editDocumentForm()
+    {
         $id = $this->checkEditDocument();
         if ($id && is_numeric($id)) {
             $projectDocument = ProjectDocument::get()->byID($id);
@@ -584,7 +607,8 @@ class ProjectPageController extends \PageController
         }
     }
 
-    public function doEditDocument($data, $form) {
+    public function doEditDocument($data, $form)
+    {
         $id = $this->checkEditDocument();
         if ($id && is_numeric($id)) {
             $projectDocument = ProjectDocument::get()->byID($id);
@@ -594,7 +618,6 @@ class ProjectPageController extends \PageController
                 $projectDocument->write();
 
                 if (isset($data['Documents']) && is_array($data['Documents'])) {
-
                     $keys = array_keys($data['Documents']);
                     $file_count = count($data['Documents']['name']);
                     for ($i = 0; $i < $file_count; $i++) {
@@ -629,12 +652,13 @@ class ProjectPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function deleteDocument() {
+    public function deleteDocument()
+    {
         $projectId = $this->checkEdit();
         $documentId = null;
         if ($this->getRequest()->getVar('dd')) {
             $documentId = $this->getRequest()->getVar('dd');
-        } else if ($this->getRequest()->postVar('dd')) {
+        } elseif ($this->getRequest()->postVar('dd')) {
             $documentId = $this->getRequest()->postVar('dd');
         }
 
@@ -655,7 +679,8 @@ class ProjectPageController extends \PageController
 
     // task management methods
 
-    public function getAllProjectTasks() {
+    public function getAllProjectTasks()
+    {
         $project = $this->actProject();
         if ($project) {
             return $project->ProjectTasks();
@@ -664,16 +689,18 @@ class ProjectPageController extends \PageController
         return false;
     }
 
-    public function checkEditTask() {
+    public function checkEditTask()
+    {
         if ($this->getRequest()->getVar('et')) {
             return $this->getRequest()->getVar('et');
-        } else if ($this->getRequest()->postVar('et')) {
+        } elseif ($this->getRequest()->postVar('et')) {
             return $this->getRequest()->postVar('et');
         }
         return false;
     }
 
-    public function addTaskForm() {
+    public function addTaskForm()
+    {
         $project = $this->actProject();
         if (!$project) {
             return false;
@@ -693,8 +720,8 @@ class ProjectPageController extends \PageController
             DateField::create('StartDate', 'Startdatum')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             DateField::create('EndDate', 'Enddatum')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             TextField::create('EstimatedHours', 'Geschätzte Stunden')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            CheckboxSetField::create('AssignedTo', 'Zugewiesen an', $allMembers),/*
-                ->setFieldHolderTemplate('FormField_customholder')
+            CheckboxSetField::create('AssignedTo', 'Zugewiesen an', $allMembers), /*
+            ->setFieldHolderTemplate('FormField_customholder')
                 ->setAttribute('class', 'form-select')
                 ->setMultiple(true),*/
             //CheckboxField::create('NeedsConfirmation', 'Benötigt Bestätigung'),
@@ -717,7 +744,8 @@ class ProjectPageController extends \PageController
         return $form;
     }
 
-    public function doAddTask($data, $form) {
+    public function doAddTask($data, $form)
+    {
         $project = $this->actProject();
         if ($project) {
             $projectTask = new ProjectTask();
@@ -734,7 +762,8 @@ class ProjectPageController extends \PageController
         return $this->redirectBack();
     }
 
-    public function editTaskForm() {
+    public function editTaskForm()
+    {
         $id = $this->checkEditTask();
         if ($id && is_numeric($id)) {
             $projectTask = ProjectTask::get()->byID($id);
@@ -770,7 +799,8 @@ class ProjectPageController extends \PageController
         }
     }
 
-    public function doEditTask($data, $form) {
+    public function doEditTask($data, $form)
+    {
         $id = $this->checkEditTask();
         if ($id && is_numeric($id)) {
             $projectTask = ProjectTask::get()->byID($id);
@@ -796,7 +826,8 @@ class ProjectPageController extends \PageController
     }
 
 
-    public function getProjectDocumentCategories() {
+    public function getProjectDocumentCategories()
+    {
         return ProjectDocumentCategory::get();
     }
 }
