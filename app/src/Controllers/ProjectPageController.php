@@ -6,6 +6,7 @@ use app\Models\Offer;
 use app\Models\Client;
 use app\Models\Invoice;
 use app\Models\Project;
+use SilverStripe\ORM\DB;
 use app\Models\ProjectTask;
 use app\Models\ClientObject;
 use SilverStripe\Forms\Form;
@@ -440,25 +441,33 @@ class ProjectPageController extends \PageController
 
                 $keys = array_keys($data['Documents']);
                 $file_count = count($data['Documents']['name']);
-                for ($i = 0; $i < $file_count; $i++) {
-                    $fileData = [];
-                    foreach ($keys as $key) {
-                        $fileData[$key] = $data['Documents'][$key][$i];
+
+                DB::get_conn()->transactionStart();
+                try {
+                    for ($i = 0; $i < $file_count; $i++) {
+                        $fileData = [];
+                        foreach ($keys as $key) {
+                            $fileData[$key] = $data['Documents'][$key][$i];
+                        }
+
+                        if ($fileData['tmp_name'] == '') {
+                            continue;
+                        }
+                        // Handle each uploaded file
+                        $file = new File();
+                        $file->setFromLocalFile($fileData['tmp_name'], $documentsFolder. '/' . $fileData['name']);
+                        $file->Title = $fileData['name'];
+                        $file->write();
+
+                        $project->Documents()->add($file, ['Category' => $data['Category']]);
                     }
 
-                    if ($fileData['tmp_name'] == '') {
-                        continue;
-                    }
-                    // Handle each uploaded file
-                    $file = new File();
-                    $file->setFromLocalFile($fileData['tmp_name'], $documentsFolder. '/' . $fileData['name']);
-                    $file->Title = $fileData['name'];
-                    $file->write();
-
-                    $project->Documents()->add($file, ['Category' => $data['Category']]);
+                    $project->write();
+                    DB::get_conn()->transactionEnd();
+                } catch (\Exception $e) {
+                    DB::get_conn()->transactionRollback();
+                    throw $e;
                 }
-
-                $project->write();
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Dateien erfolgreich hochgeladen.');
                 return $this->redirect($this->Link('?e=' . $project->ID . '&activetab=project_documents'));
@@ -521,26 +530,34 @@ class ProjectPageController extends \PageController
 
                 $keys = array_keys($data['Documents']);
                 $file_count = count($data['Documents']['name']);
-                for ($i = 0; $i < $file_count; $i++) {
-                    $fileData = [];
-                    foreach ($keys as $key) {
-                        $fileData[$key] = $data['Documents'][$key][$i];
+
+                DB::get_conn()->transactionStart();
+                try {
+                    for ($i = 0; $i < $file_count; $i++) {
+                        $fileData = [];
+                        foreach ($keys as $key) {
+                            $fileData[$key] = $data['Documents'][$key][$i];
+                        }
+
+                        if ($fileData['tmp_name'] == '') {
+                            continue;
+                        }
+                        // Handle each uploaded file
+                        $file = new File();
+                        $file->setFromLocalFile($fileData['tmp_name'], 'project-documents/' . $projectDocument->ProjectID . '/' . $fileData['name']);
+                        $file->Title = $fileData['name'];
+                        $file->write();
+
+                        // Associate file with project document
+                        $projectDocument->Documents()->add($file);
                     }
 
-                    if ($fileData['tmp_name'] == '') {
-                        continue;
-                    }
-                    // Handle each uploaded file
-                    $file = new File();
-                    $file->setFromLocalFile($fileData['tmp_name'], 'project-documents/' . $projectDocument->ProjectID . '/' . $fileData['name']);
-                    $file->Title = $fileData['name'];
-                    $file->write();
-
-                    // Associate file with project document
-                    $projectDocument->Documents()->add($file);
+                    $projectDocument->write();
+                    DB::get_conn()->transactionEnd();
+                } catch (\Exception $e) {
+                    DB::get_conn()->transactionRollback();
+                    throw $e;
                 }
-
-                $projectDocument->write();
             }
 
             $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Dokumenten-Kategorie erfolgreich hinzugefügt.');
@@ -597,26 +614,34 @@ class ProjectPageController extends \PageController
 
                     $keys = array_keys($data['Documents']);
                     $file_count = count($data['Documents']['name']);
-                    for ($i = 0; $i < $file_count; $i++) {
-                        $fileData = [];
-                        foreach ($keys as $key) {
-                            $fileData[$key] = $data['Documents'][$key][$i];
+
+                    DB::get_conn()->transactionStart();
+                    try {
+                        for ($i = 0; $i < $file_count; $i++) {
+                            $fileData = [];
+                            foreach ($keys as $key) {
+                                $fileData[$key] = $data['Documents'][$key][$i];
+                            }
+
+                            if ($fileData['tmp_name'] == '') {
+                                continue;
+                            }
+                            // Handle each uploaded file
+                            $file = new File();
+                            $file->setFromLocalFile($fileData['tmp_name'], 'project-documents/' . $projectDocument->ProjectID . '/' . $fileData['name']);
+                            $file->Title = $fileData['name'];
+                            $file->write();
+
+                            // Associate file with project document
+                            $projectDocument->Documents()->add($file);
                         }
 
-                        if ($fileData['tmp_name'] == '') {
-                            continue;
-                        }
-                        // Handle each uploaded file
-                        $file = new File();
-                        $file->setFromLocalFile($fileData['tmp_name'], 'project-documents/' . $projectDocument->ProjectID . '/' . $fileData['name']);
-                        $file->Title = $fileData['name'];
-                        $file->write();
-
-                        // Associate file with project document
-                        $projectDocument->Documents()->add($file);
+                        $projectDocument->write();
+                        DB::get_conn()->transactionEnd();
+                    } catch (\Exception $e) {
+                        DB::get_conn()->transactionRollback();
+                        throw $e;
                     }
-
-                    $projectDocument->write();
                 }
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Dokumenten-Kategorie erfolgreich gespeichert.');
