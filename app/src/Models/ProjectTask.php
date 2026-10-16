@@ -98,20 +98,6 @@ class ProjectTask extends DataObject implements PermissionProvider, i18nEntityPr
             return false;
         }
 
-        // check status
-        if ($this->Status !== 2) { // InProgress
-            //return false;
-        }
-
-        // check date
-        $today = date('Y-m-d');
-        if ($this->StartDate && $today < $this->StartDate) {
-            //return false;
-        }
-        if ($this->EndDate && $today > $this->EndDate) {
-            //return false;
-        }
-
         return true;
     }
 
