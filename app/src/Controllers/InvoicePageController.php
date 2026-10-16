@@ -411,19 +411,26 @@ class InvoicePageController extends \PageController
 
             // Copy all offer articles to invoice articles
             $offerArticles = $offer->OfferArticles();
-            foreach ($offerArticles as $offerArticle) {
-                $invoiceArticle = new InvoiceArticle();
-                $invoiceArticle->InvoiceID = $invoice->ID;
-                $invoiceArticle->Title = $offerArticle->Title;
-                $invoiceArticle->Description = $offerArticle->Description;
-                $invoiceArticle->Quantity = $offerArticle->Quantity;
-                $invoiceArticle->Unit = $offerArticle->Unit;
-                $invoiceArticle->SellPriceNetto = $offerArticle->SellPriceNetto;
-                $invoiceArticle->Discount = $offerArticle->Discount;
-                $invoiceArticle->TaxRate = $offerArticle->TaxRate;
-                $invoiceArticle->FinalPrice = $offerArticle->FinalPrice;
-                $invoiceArticle->SourceArticleID = $offerArticle->SourceArticleID;
-                $invoiceArticle->write();
+            \SilverStripe\ORM\DB::get_conn()->transactionStart();
+            try {
+                foreach ($offerArticles as $offerArticle) {
+                    $invoiceArticle = new InvoiceArticle();
+                    $invoiceArticle->InvoiceID = $invoice->ID;
+                    $invoiceArticle->Title = $offerArticle->Title;
+                    $invoiceArticle->Description = $offerArticle->Description;
+                    $invoiceArticle->Quantity = $offerArticle->Quantity;
+                    $invoiceArticle->Unit = $offerArticle->Unit;
+                    $invoiceArticle->SellPriceNetto = $offerArticle->SellPriceNetto;
+                    $invoiceArticle->Discount = $offerArticle->Discount;
+                    $invoiceArticle->TaxRate = $offerArticle->TaxRate;
+                    $invoiceArticle->FinalPrice = $offerArticle->FinalPrice;
+                    $invoiceArticle->SourceArticleID = $offerArticle->SourceArticleID;
+                    $invoiceArticle->write();
+                }
+                \SilverStripe\ORM\DB::get_conn()->transactionEnd();
+            } catch (\Exception $e) {
+                \SilverStripe\ORM\DB::get_conn()->transactionRollback();
+                throw $e;
             }
         }
     }
@@ -450,19 +457,26 @@ class InvoicePageController extends \PageController
 
             // copy all invoice articles with negative quantities
             $invoiceArticles = $invoice->InvoiceArticles();
-            foreach ($invoiceArticles as $invoiceArticle) {
-                $newArticle = new InvoiceArticle();
-                $newArticle->InvoiceID = $cancellationInvoice->ID;
-                $newArticle->Title = $invoiceArticle->Title;
-                $newArticle->Description = $invoiceArticle->Description;
-                $newArticle->Quantity = -1 * $invoiceArticle->Quantity;
-                $newArticle->Unit = $invoiceArticle->Unit;
-                $newArticle->SellPriceNetto = $invoiceArticle->SellPriceNetto;
-                $newArticle->Discount = $invoiceArticle->Discount;
-                $newArticle->TaxRate = $invoiceArticle->TaxRate;
-                $newArticle->FinalPrice = -1 * $invoiceArticle->FinalPrice;
-                $newArticle->SourceArticleID = $invoiceArticle->SourceArticleID;
-                $newArticle->write();
+            \SilverStripe\ORM\DB::get_conn()->transactionStart();
+            try {
+                foreach ($invoiceArticles as $invoiceArticle) {
+                    $newArticle = new InvoiceArticle();
+                    $newArticle->InvoiceID = $cancellationInvoice->ID;
+                    $newArticle->Title = $invoiceArticle->Title;
+                    $newArticle->Description = $invoiceArticle->Description;
+                    $newArticle->Quantity = -1 * $invoiceArticle->Quantity;
+                    $newArticle->Unit = $invoiceArticle->Unit;
+                    $newArticle->SellPriceNetto = $invoiceArticle->SellPriceNetto;
+                    $newArticle->Discount = $invoiceArticle->Discount;
+                    $newArticle->TaxRate = $invoiceArticle->TaxRate;
+                    $newArticle->FinalPrice = -1 * $invoiceArticle->FinalPrice;
+                    $newArticle->SourceArticleID = $invoiceArticle->SourceArticleID;
+                    $newArticle->write();
+                }
+                \SilverStripe\ORM\DB::get_conn()->transactionEnd();
+            } catch (\Exception $e) {
+                \SilverStripe\ORM\DB::get_conn()->transactionRollback();
+                throw $e;
             }
         }
         $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Stornorechnung erfolgreich erstellt.');
