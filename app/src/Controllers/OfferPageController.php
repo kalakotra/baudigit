@@ -281,7 +281,6 @@ class OfferPageController extends \PageController
                 $article->write();
 
                 $this->setNotifySessionData('success', 'bi bi-check2-circle', 'Artikel erfolgreich hinzugefügt.');
-                //return $this->redirectBack();
                 return $this->redirect($this->Link('?e=' . $offer->ID . '&activetab=offer_article'));
             }
         }
