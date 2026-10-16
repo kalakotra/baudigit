@@ -373,19 +373,27 @@ class RecurringInvoicePageController extends \PageController
             
             // Copy all offer articles to invoice articles
             $offerArticles = $offer->Articles();
-            foreach ($offerArticles as $offerArticle) {
-                $invoiceArticle = new InvoiceArticle();
-                $invoiceArticle->InvoiceID = $invoice->ID;
-                $invoiceArticle->Title = $offerArticle->Title;
-                $invoiceArticle->Description = $offerArticle->Description;
-                $invoiceArticle->Quantity = $offerArticle->Quantity;
-                $invoiceArticle->Unit = $offerArticle->Unit;
-                $invoiceArticle->SellPriceNetto = $offerArticle->SellPriceNetto;
-                $invoiceArticle->Discount = $offerArticle->Discount;
-                $invoiceArticle->TaxRate = $offerArticle->TaxRate;
-                $invoiceArticle->FinalPrice = $offerArticle->FinalPrice;
-                $invoiceArticle->SourceArticleID = $offerArticle->SourceArticleID;
-                $invoiceArticle->write();
+
+            \SilverStripe\ORM\DB::get_conn()->transactionStart();
+            try {
+                foreach ($offerArticles as $offerArticle) {
+                    $invoiceArticle = new InvoiceArticle();
+                    $invoiceArticle->InvoiceID = $invoice->ID;
+                    $invoiceArticle->Title = $offerArticle->Title;
+                    $invoiceArticle->Description = $offerArticle->Description;
+                    $invoiceArticle->Quantity = $offerArticle->Quantity;
+                    $invoiceArticle->Unit = $offerArticle->Unit;
+                    $invoiceArticle->SellPriceNetto = $offerArticle->SellPriceNetto;
+                    $invoiceArticle->Discount = $offerArticle->Discount;
+                    $invoiceArticle->TaxRate = $offerArticle->TaxRate;
+                    $invoiceArticle->FinalPrice = $offerArticle->FinalPrice;
+                    $invoiceArticle->SourceArticleID = $offerArticle->SourceArticleID;
+                    $invoiceArticle->write();
+                }
+                \SilverStripe\ORM\DB::get_conn()->transactionEnd();
+            } catch (\Throwable $e) {
+                \SilverStripe\ORM\DB::get_conn()->transactionRollback();
+                throw $e;
             }
         }
     }
