@@ -17,7 +17,7 @@ class MemberExtension extends DataExtension
         parent::onBeforeWrite();
         if (!$this->owner->MemberColor) {
             // generate a random hex color code
-            $this->owner->MemberColor = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+            $this->owner->MemberColor = sprintf('#%06X', random_int(0, 0xFFFFFF));
         }
 
         // if active is false, set LockedOutUntil to +100 years
