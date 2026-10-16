@@ -140,9 +140,12 @@ class ProjectMember extends DataObject implements PermissionProvider, i18nEntity
     {
         parent::onBeforeWrite();
 
-        // Convert WorkDaysArray to WorkDays string
-        if (isset($_POST['WorkDaysArray']) && is_array($_POST['WorkDaysArray'])) {
-            $this->WorkDays = implode(',', $_POST['WorkDaysArray']);
+        // Convert WorkDaysArray to WorkDays string safely
+        $request = \SilverStripe\Control\Controller::has_curr() ? \SilverStripe\Control\Controller::curr()->getRequest() : null;
+        $workDaysArray = $request ? $request->postVar('WorkDaysArray') : null;
+
+        if ($workDaysArray && is_array($workDaysArray)) {
+            $this->WorkDays = implode(',', $workDaysArray);
         } elseif (!$this->WorkDays) {
             // Default to Monday-Friday if not set
             $this->WorkDays = '1,2,3,4,5';
