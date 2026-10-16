@@ -109,10 +109,16 @@ class OfferPageController extends \PageController
         $nextOfferNumber = $lastOffer ? $lastOffer->getNextOfferNumber() : date('Y') . '-0001';
         $allCLients = Client::get()->map('ID', 'Company')->toArray();
         $clientGroupedList = [];
-        foreach ($allCLients as $id => $company) {
-            $clientObjects = ClientObject::get()->filter('ClientID', $id);
-            if ($clientObjects->count() > 0) {
-                $clientGroupedList[$company] = $clientObjects->map('ID', 'getFullName')->toArray();
+        if (!empty($allCLients)) {
+            $allClientObjects = ClientObject::get()->filter('ClientID', array_keys($allCLients));
+            foreach ($allClientObjects as $clientObject) {
+                $company = $allCLients[$clientObject->ClientID] ?? null;
+                if ($company) {
+                    if (!isset($clientGroupedList[$company])) {
+                        $clientGroupedList[$company] = [];
+                    }
+                    $clientGroupedList[$company][$clientObject->ID] = $clientObject->getFullName();
+                }
             }
         }
 

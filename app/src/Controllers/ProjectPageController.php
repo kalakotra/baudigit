@@ -102,10 +102,16 @@ class ProjectPageController extends \PageController
     public function add() {
         $allClients = Client::get()->map('ID', 'Company')->toArray();
         $clientGroupedList = [];
-        foreach ($allClients as $id => $company) {
-            $clientObjects = ClientObject::get()->filter('ClientID', $id);
-            if ($clientObjects->count() > 0) {
-                $clientGroupedList[$company] = $clientObjects->map('ID', 'getFullName')->toArray();
+        if (!empty($allClients)) {
+            $allClientObjects = ClientObject::get()->filter('ClientID', array_keys($allClients));
+            foreach ($allClientObjects as $clientObject) {
+                $company = $allClients[$clientObject->ClientID] ?? null;
+                if ($company) {
+                    if (!isset($clientGroupedList[$company])) {
+                        $clientGroupedList[$company] = [];
+                    }
+                    $clientGroupedList[$company][$clientObject->ID] = $clientObject->getFullName();
+                }
             }
         }
 
