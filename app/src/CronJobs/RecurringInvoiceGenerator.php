@@ -25,7 +25,7 @@ class RecurringInvoiceGenerator extends Controller implements PermissionProvider
 	{
 		$token = $this->getRequest()->getVar('token');
 		$validToken = Environment::getEnv('SS_CRONJOB_TOKEN');
-		if ($token && $validToken && hash_equals($validToken, $token)) {
+		if (is_string($token) && is_string($validToken) && hash_equals($validToken, $token)) {
 			return true;
 		}
 		
