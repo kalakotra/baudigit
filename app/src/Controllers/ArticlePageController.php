@@ -57,9 +57,7 @@ class ArticlePageController extends \PageController
             TextField::create('Title', 'Titel')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             DropdownField::create('Unit', 'Einheit', Article::singleton()->getUnitOptions())->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select'),
             TextField::create('BuyPriceNetto', 'Einkaufspreis netto')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            //TextField::create('BuyPriceBrutto', 'Einkaufspreis brutto')->setReadonly(true)->setDescription('Wird automatisch aus dem Nettopreis und der MwSt. berechnet.')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             TextField::create('SellPriceNetto', 'Verkaufspreis netto')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-            //TextField::create('SellPriceBrutto', 'Verkaufspreis brutto')->setReadonly(true)->setDescription('Wird automatisch aus dem Nettopreis und der MwSt. berechnet.')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
             TextField::create('Description', 'Beschreibung')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control')
         );
 
@@ -100,9 +98,7 @@ class ArticlePageController extends \PageController
                     TextField::create('Title', 'Titel')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
                     DropdownField::create('Unit', 'Einheit', Article::singleton()->getUnitOptions())->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-select'),
                     TextField::create('BuyPriceNetto', 'Einkaufspreis netto')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-                    //TextField::create('BuyPriceBrutto', 'Einkaufspreis brutto')->setReadonly(true)->setDescription('Wird automatisch aus dem Nettopreis und der MwSt. berechnet.')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
                     TextField::create('SellPriceNetto', 'Verkaufspreis netto')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
-                    //TextField::create('SellPriceBrutto', 'Verkaufspreis brutto')->setReadonly(true)->setDescription('Wird automatisch aus dem Nettopreis und der MwSt. berechnet.')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
                     TextField::create('Description', 'Beschreibung')->setFieldHolderTemplate('FormField_customholder')->setAttribute('class', 'form-control'),
                     HiddenField::create('e', 'ID')->setValue($id)
                 );
