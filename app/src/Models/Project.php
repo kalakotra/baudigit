@@ -184,8 +184,8 @@ class Project extends DataObject implements PermissionProvider, i18nEntityProvid
      */
     public function getAssignedMembers()
     {
-        /*return Member::get()->innerJoin('app_ProjectMember', 'app_ProjectMember.MemberID = Member.ID')
-            ->where(['app_ProjectMember.ProjectID' => $this->ID]);*/
+        return Member::get()->innerJoin('app_ProjectMember', 'app_ProjectMember.MemberID = Member.ID')
+            ->where(['app_ProjectMember.ProjectID' => $this->ID]);
     }
 
     /**
