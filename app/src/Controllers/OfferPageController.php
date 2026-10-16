@@ -12,6 +12,7 @@ use app\Models\OfferArticle;
 use app\Pages\ProjectPage;
 use SilverStripe\Forms\Form;
 use app\Models\InvoiceArticle;
+use SilverStripe\ORM\DB;
 use SilverStripe\ORM\DataList;
 use SilverStripe\Forms\DateField;
 use SilverStripe\Forms\FieldList;
@@ -389,20 +390,22 @@ class OfferPageController extends \PageController
             
             // Copy all offer articles to invoice articles
             $offerArticles = $offer->OfferArticles();
-            foreach ($offerArticles as $offerArticle) {
-                $invoiceArticle = new InvoiceArticle();
-                $invoiceArticle->InvoiceID = $invoice->ID;
-                $invoiceArticle->Title = $offerArticle->Title;
-                $invoiceArticle->Description = $offerArticle->Description;
-                $invoiceArticle->Quantity = $offerArticle->Quantity;
-                $invoiceArticle->Unit = $offerArticle->Unit;
-                $invoiceArticle->SellPriceNetto = $offerArticle->SellPriceNetto;
-                $invoiceArticle->Discount = $offerArticle->Discount;
-                $invoiceArticle->TaxRate = $offerArticle->TaxRate;
-                $invoiceArticle->FinalPrice = $offerArticle->FinalPrice;
-                $invoiceArticle->SourceArticleID = $offerArticle->SourceArticleID;
-                $invoiceArticle->write();
-            }
+            DB::get_conn()->withTransaction(function () use ($offerArticles, $invoice) {
+                foreach ($offerArticles as $offerArticle) {
+                    $invoiceArticle = new InvoiceArticle();
+                    $invoiceArticle->InvoiceID = $invoice->ID;
+                    $invoiceArticle->Title = $offerArticle->Title;
+                    $invoiceArticle->Description = $offerArticle->Description;
+                    $invoiceArticle->Quantity = $offerArticle->Quantity;
+                    $invoiceArticle->Unit = $offerArticle->Unit;
+                    $invoiceArticle->SellPriceNetto = $offerArticle->SellPriceNetto;
+                    $invoiceArticle->Discount = $offerArticle->Discount;
+                    $invoiceArticle->TaxRate = $offerArticle->TaxRate;
+                    $invoiceArticle->FinalPrice = $offerArticle->FinalPrice;
+                    $invoiceArticle->SourceArticleID = $offerArticle->SourceArticleID;
+                    $invoiceArticle->write();
+                }
+            });
             
             // Update offer status to 'Accepted'
             $offer->Status = 'Accepted';
